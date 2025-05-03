@@ -394,6 +394,7 @@
                 <button class="secondary" id="loadListBtn">Загрузить список</button>
                 <input type="file" id="loadFile" style="display: none;" accept=".json">
             </div>
+            <ul id="listManagement"></ul>
             <select id="storeSelect">
                 <option value="">Выберите магазин</option>
             </select>
@@ -493,6 +494,8 @@
                 updateStoreList();
             } else if (tabId === 'productsTab') {
                 updateProductList();
+            } else if (tabId === 'listsTab') {
+                updateListManagement();
             }
             console.log(`Tab switched to: ${tabId}`);
         }
@@ -502,6 +505,16 @@
                 const storedUsers = localStorage.getItem('users');
                 if (storedUsers) {
                     users = JSON.parse(storedUsers) || {};
+                    // Upgrade products from strings to objects for backward compatibility
+                    Object.values(users).forEach(user => {
+                        Object.values(user.stores || {}).forEach(store => {
+                            store.departments.forEach(dept => {
+                                if (dept.products.some(p => typeof p === 'string')) {
+                                    dept.products = dept.products.map(p => typeof p === 'string' ? { name: p, quantity: 1, comment: '' } : p);
+                                }
+                            });
+                        });
+                    });
                 }
             } catch (e) {
                 console.error('Error parsing users from localStorage:', e);
@@ -537,6 +550,7 @@
                 updateStoreSelect();
                 updateStoreList();
                 updateProductList();
+                updateListManagement();
                 alert('Вход выполнен!');
             } else {
                 alert('Неверный пароль!');
@@ -555,6 +569,7 @@
             updateShoppingList();
             updateStoreList();
             updateProductList();
+            updateListManagement();
         }
 
         function updateAuthState() {
@@ -590,6 +605,49 @@
                 listSelect.appendChild(option);
                 listSelectForShop.appendChild(option.cloneNode(true));
             });
+        }
+
+        function updateListManagement() {
+            const listManagement = document.getElementById('listManagement');
+            if (!listManagement) return;
+
+            listManagement.innerHTML = '';
+            Object.keys(shoppingLists).forEach(list => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <span>${list}</span>
+                    <div class="edit-delete-controls">
+                        <button onclick="editList('${list}')">✏️</button>
+                        <button onclick="deleteList('${list}')">🗑️</button>
+                    </div>
+                `;
+                listManagement.appendChild(li);
+            });
+        }
+
+        function editList(oldName) {
+            const newName = prompt('Введите новое название списка:', oldName);
+            if (newName && newName !== oldName && !shoppingLists[newName]) {
+                shoppingLists[newName] = shoppingLists[oldName];
+                delete shoppingLists[oldName];
+                if (selectedList === oldName) selectedList = newName;
+                saveShoppingLists();
+                updateListSelect();
+                updateListManagement();
+            } else if (shoppingLists[newName]) {
+                alert('Список с таким названием уже существует!');
+            }
+        }
+
+        function deleteList(listName) {
+            if (confirm(`Вы уверены, что хотите удалить список "${listName}"?`)) {
+                delete shoppingLists[listName];
+                if (selectedList === listName) selectedList = null;
+                saveShoppingLists();
+                updateListSelect();
+                updateListManagement();
+                updateShoppingList();
+            }
         }
 
         function updateStoreSelect() {
@@ -678,6 +736,7 @@
                 selectedList = listName;
                 saveShoppingLists();
                 updateListSelect();
+                updateListManagement();
                 updateShoppingList();
             } else if (shoppingLists[listName]) {
                 alert('Список с таким названием уже существует!');
@@ -1225,6 +1284,7 @@
                             selectedList = listName;
                             saveShoppingLists();
                             updateListSelect();
+                            updateListManagement();
                             updateShoppingList();
                             alert('Список успешно загружен!');
                         } else {
