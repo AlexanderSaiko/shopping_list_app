@@ -3,97 +3,161 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Список покупок | Udemy Style</title>
+    <title>Список покупок</title>
     <style>
-        body {
-            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        :root {
+            --background: #f2f2f7;
+            --card-background: #ffffff;
+            --text: #000000;
+            --secondary-text: #6e6e73;
+            --accent: #007aff;
+            --button-background: #007aff;
+            --button-text: #ffffff;
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            --border: #d1d1d6;
+            --completed: #ff0000;
+        }
+
+        [data-theme="dark"] {
+            --background: #1c1c1e;
+            --card-background: #2c2c2e;
+            --text: #ffffff;
+            --secondary-text: #8e8e93;
+            --accent: #0a84ff;
+            --button-background: #0a84ff;
+            --button-text: #ffffff;
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            --border: #3c3c3e;
+            --completed: #ff6666;
+        }
+
+        * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            background: #f7f7f7;
-            color: #1c1d1f;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro', sans-serif;
+            background: var(--background);
+            color: var(--text);
+            transition: all 0.3s ease;
         }
 
         header {
-            background: #1c1d1f;
-            padding: 10px 20px;
+            background: var(--card-background);
+            padding: 12px 16px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            box-shadow: var(--shadow);
             position: sticky;
             top: 0;
             z-index: 100;
         }
 
         header h1 {
-            color: white;
-            font-size: 24px;
-            margin: 0;
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text);
         }
 
         nav {
             display: flex;
-            flex-wrap: wrap;
             align-items: center;
+            gap: 8px;
         }
 
         nav button {
             background: none;
             border: none;
-            color: #a1a1a6;
+            color: var(--secondary-text);
             font-size: 16px;
-            padding: 10px 15px;
+            padding: 8px 12px;
             cursor: pointer;
-            transition: color 0.3s;
+            transition: color 0.3s ease;
         }
 
-        nav button:hover, nav button.active {
-            color: white;
+        nav button.active, nav button:hover {
+            color: var(--accent);
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: var(--secondary-text);
         }
 
         .container {
-            max-width: 800px;
-            margin: 20px auto;
-            padding: 20px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            max-width: 600px;
+            margin: 16px auto;
+            padding: 0 16px;
         }
 
-        .tab { display: none; }
-        .tab.active { display: block; }
+        .tab {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
         h2 {
             font-size: 24px;
-            margin-bottom: 20px;
-            color: #1c1d1f;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--text);
         }
 
         select, input[type="text"], input[type="number"], input[type="file"], input[type="password"] {
             width: 100%;
-            max-width: 300px;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #d1d7dc;
-            border-radius: 4px;
+            padding: 12px;
+            margin: 8px 0;
+            border: 1px solid var(--border);
+            border-radius: 10px;
             font-size: 16px;
-            box-sizing: border-box;
+            background: var(--card-background);
+            color: var(--text);
+            appearance: none;
+            transition: border-color 0.3s ease;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: var(--accent);
         }
 
         button {
-            background: #ec5252;
-            color: white;
+            background: var(--button-background);
+            color: var(--button-text);
             border: none;
-            padding: 10px 20px;
-            border-radius: 4px;
+            padding: 12px 20px;
+            border-radius: 10px;
             font-size: 16px;
+            font-weight: 500;
             cursor: pointer;
-            transition: background 0.3s;
-            margin: 10px 0;
+            transition: background 0.3s ease;
+            margin: 8px 4px;
+            display: inline-block;
         }
 
         button:hover {
-            background: #d43f3f;
+            background: var(--accent);
+            filter: brightness(1.1);
+        }
+
+        button.secondary {
+            background: var(--card-background);
+            color: var(--accent);
+            border: 1px solid var(--border);
         }
 
         ul {
@@ -102,36 +166,42 @@
         }
 
         ul li {
-            padding: 10px;
+            background: var(--card-background);
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 10px;
             font-size: 16px;
-            border-bottom: 1px solid #f1f1f1;
             display: flex;
             align-items: center;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 8px;
+            box-shadow: var(--shadow);
+            transition: transform 0.2s ease;
+        }
+
+        ul li:hover {
+            transform: translateY(-2px);
         }
 
         ul li.completed {
             text-decoration: line-through;
-            color: #787878;
+            text-decoration-color: var(--completed);
+            color: var(--secondary-text);
         }
 
         .quantity-controls {
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 4px;
         }
 
         .quantity-controls button {
-            background: #f1f1f1;
-            color: #1c1d1f;
-            padding: 5px 10px;
+            background: var(--card-background);
+            color: var(--accent);
+            padding: 8px;
             font-size: 14px;
             margin: 0;
-        }
-
-        .quantity-controls button:hover {
-            background: #e0e0e0;
+            border: 1px solid var(--border);
         }
 
         .quantity-controls input {
@@ -148,56 +218,85 @@
 
         #suggestions {
             position: absolute;
-            background: white;
-            border: 1px solid #d1d7dc;
+            background: var(--card-background);
+            border: 1px solid var(--border);
             max-height: 150px;
             overflow-y: auto;
             z-index: 10;
             width: 100%;
             max-width: 300px;
-            border-radius: 4px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            box-shadow: var(--shadow);
         }
 
         #suggestions div {
-            padding: 10px;
+            padding: 12px;
             cursor: pointer;
+            color: var(--text);
         }
 
         #suggestions div:hover {
-            background: #f7f7f7;
+            background: var(--background);
         }
 
         .auth-info {
-            color: #a1a1a6;
+            color: var(--secondary-text);
             font-size: 14px;
-            margin-left: 10px;
+            margin-left: 8px;
         }
 
-        /* Адаптивность для iPhone 13 и выше */
+        .list-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .list-controls select {
+            max-width: 200px;
+        }
+
+        .list-controls button {
+            padding: 8px 12px;
+            font-size: 14px;
+        }
+
+        .edit-delete-controls {
+            display: flex;
+            gap: 4px;
+            margin-left: auto;
+        }
+
+        .edit-delete-controls button {
+            padding: 8px;
+            font-size: 14px;
+        }
+
         @media (max-width: 430px) {
             header {
                 flex-direction: column;
-                padding: 10px;
+                padding: 8px;
+                gap: 8px;
             }
 
             header h1 {
-                font-size: 20px;
+                font-size: 18px;
             }
 
             nav {
                 justify-content: center;
                 width: 100%;
+                flex-wrap: wrap;
             }
 
             nav button {
                 font-size: 14px;
-                padding: 8px 10px;
+                padding: 6px 8px;
             }
 
             .container {
-                margin: 10px;
-                padding: 15px;
+                margin: 8px;
+                padding: 0 8px;
             }
 
             h2 {
@@ -232,7 +331,16 @@
             }
 
             .auth-info {
-                margin-top: 10px;
+                margin-top: 8px;
+            }
+
+            .list-controls {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .list-controls select {
+                max-width: 100%;
             }
         }
     </style>
@@ -241,360 +349,438 @@
     <header>
         <h1>Список покупок</h1>
         <nav>
-            <button onclick="showTab('auth')" id="authTabBtn">Войти</button>
-            <button onclick="showTab('stores')" id="storesTabBtn" style="display: none;">Магазины</button>
-            <button onclick="showTab('departments')" id="departmentsTabBtn" style="display: none;">Отделы</button>
-            <button onclick="showTab('deptProducts')" id="deptProductsTabBtn" style="display: none;">Продукты отделов</button>
-            <button onclick="showTab('shopping')" id="shoppingTabBtn" style="display: none;">Список покупок</button>
-            <button onclick="showTab('loadList')" id="loadListTabBtn" style="display: none;">Загрузить список</button>
+            <button id="shopTabBtn" class="active">В магазине</button>
+            <button id="listsTabBtn">Списки</button>
+            <button id="storesTabBtn">Магазины</button>
+            <button id="authTabBtn">Авторизация</button>
+            <button class="theme-toggle" id="themeToggle">🌙</button>
             <span class="auth-info" id="authInfo"></span>
         </nav>
     </header>
 
     <div class="container">
-        <!-- Вкладка авторизации -->
-        <div id="auth" class="tab active">
-            <h2>Вход / Регистрация</h2>
-            <input id="username" type="text" placeholder="Логин">
-            <input id="password" type="password" placeholder="Пароль">
-            <button onclick="register()">Регистрация</button>
-            <button onclick="login()">Вход</button>
-            <button onclick="logout()" id="logoutBtn" style="display: none;">Выйти</button>
-        </div>
-
-        <!-- Вкладка магазинов -->
-        <div id="stores" class="tab">
-            <h2>Магазины</h2>
-            <input id="storeName" placeholder="Название магазина">
-            <button onclick="addStore()">Добавить магазин</button>
-            <ul id="storeList"></ul>
-        </div>
-
-        <!-- Вкладка отделов -->
-        <div id="departments" class="tab">
-            <h2>Настройка отделов</h2>
-            <select id="storeSelectForDepts" onchange="updateDeptList()"></select>
-            <input id="deptName" placeholder="Название отдела">
-            <input id="deptOrder" type="number" placeholder="Порядок">
-            <button onclick="addDepartment()">Добавить</button>
-            <ul id="deptList"></ul>
-        </div>
-
-        <!-- Вкладка продуктов отделов -->
-        <div id="deptProducts" class="tab">
-            <h2>Продукты отделов</h2>
-            <select id="storeSelectForProducts" onchange="updateDeptSelectForProducts()"></select>
-            <select id="deptSelectForProducts"></select>
-            <input id="productName" placeholder="Новый продукт">
-            <button onclick="addProductToDept()">Добавить</button>
-            <ul id="productList"></ul>
-        </div>
-
-        <!-- Вкладка списка покупок -->
-        <div id="shopping" class="tab">
-            <h2>Список покупок</h2>
-            <select id="storeSelect" onchange="updateDeptSelect()"></select>
-            <select id="deptSelect"></select>
-            <select id="productSelect" onchange="addItemFromSelect()"></select>
-            <div style="position: relative;">
-                <input id="customProduct" placeholder="Произвольный продукт" oninput="showSuggestions()" onkeydown="handleKey(event)">
-                <div id="suggestions"></div>
+        <div id="shopTab" class="tab active">
+            <h2>Ваши покупки</h2>
+            <div class="list-controls">
+                <select id="listSelectForShop">
+                    <option value="">Выберите список</option>
+                </select>
             </div>
-            <button onclick="addItemFromInput()">Добавить в список</button>
-            <button onclick="saveAndSort()">Сохранить и отсортировать</button>
-            <button onclick="downloadList()">Скачать список (JSON)</button>
             <ul id="shoppingList"></ul>
         </div>
 
-        <!-- Вкладка загрузки списка -->
-        <div id="loadList" class="tab">
-            <h2>Загрузить список</h2>
-            <select id="storeSelectForLoad" onchange="updateShoppingList()"></select>
-            <input type="file" id="loadFile" accept=".json" onchange="loadListFromFile()">
-            <p>Выберите JSON-файл со списком покупок для загрузки.</p>
+        <div id="listsTab" class="tab">
+            <h2>Списки покупок</h2>
+            <div class="list-controls">
+                <select id="listSelect">
+                    <option value="">Выберите список</option>
+                </select>
+                <button class="secondary" id="newListBtn">Новый список</button>
+                <button class="secondary" id="downloadListBtn">Скачать список</button>
+                <button class="secondary" id="loadListBtn">Загрузить список</button>
+                <input type="file" id="loadFile" style="display: none;" accept=".json">
+            </div>
+            <select id="storeSelect">
+                <option value="">Выберите магазин</option>
+            </select>
+            <select id="deptSelect">
+                <option value="">Выберите отдел</option>
+            </select>
+            <select id="productSelect">
+                <option value="">Выберите продукт</option>
+            </select>
+            <button id="addItemFromSelectBtn">Добавить</button>
+            <input type="text" id="customProduct" placeholder="Или введите свой продукт">
+            <div id="suggestions"></div>
+            <button id="addItemFromInputBtn">Добавить свой</button>
+            <button id="saveAndSortBtn">Сохранить и отсортировать</button>
+            <ul id="shoppingList"></ul>
+        </div>
+
+        <div id="storesTab" class="tab">
+            <h2>Магазины</h2>
+            <input type="text" id="storeName" placeholder="Название магазина">
+            <button id="addStoreBtn">Добавить магазин</button>
+            <ul id="storeList"></ul>
+            <h2>Отделы</h2>
+            <select id="storeSelectForDept">
+                <option value="">Выберите магазин</option>
+            </select>
+            <input type="text" id="deptName" placeholder="Название отдела">
+            <input type="number" id="deptOrder" placeholder="Порядок отдела" min="1">
+            <button id="addDepartmentBtn">Добавить отдел</button>
+            <ul id="deptList"></ul>
+        </div>
+
+        <div id="authTab" class="tab">
+            <h2>Авторизация</h2>
+            <input type="text" id="username" placeholder="Имя пользователя">
+            <input type="password" id="password" placeholder="Пароль">
+            <button id="loginBtn">Войти</button>
+            <button class="secondary" id="logoutBtn">Выйти</button>
         </div>
     </div>
 
     <script>
-        let users = JSON.parse(localStorage.getItem('users')) || {};
+        let shoppingLists = {};
+        let defaultStores = {};
+        let users = {};
         let currentUser = null;
-        let stores = {};
+        let selectedList = null;
         let selectedStore = null;
         let selectedSuggestionIndex = -1;
 
-        function showTab(tabId) {
+        function initTheme() {
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            document.documentElement.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            document.documentElement.setAttribute('data-theme', currentTheme === 'dark' ? 'light' : 'dark');
+        }
+
+        function showTab(tabId, btnId) {
             document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-            document.getElementById(tabId).classList.add('active');
             document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('active'));
-            document.querySelector(`nav button[onclick="showTab('${tabId}')"]`).classList.add('active');
-            if (currentUser) {
-                if (tabId === 'stores') updateStoreList();
-                if (tabId === 'departments') updateStoreSelect('storeSelectForDepts');
-                if (tabId === 'deptProducts') updateStoreSelect('storeSelectForProducts');
-                if (tabId === 'shopping') updateStoreSelect('storeSelect');
-                if (tabId === 'loadList') updateStoreSelect('storeSelectForLoad');
+            const tab = document.getElementById(tabId);
+            const btn = document.getElementById(btnId);
+            if (tab && btn) {
+                tab.classList.add('active');
+                btn.classList.add('active');
+                if (tabId === 'storesTab') updateStoreList();
             }
         }
 
-        function updateAuthState() {
-            const authTabBtn = document.getElementById('authTabBtn');
-            const storesTabBtn = document.getElementById('storesTabBtn');
-            const departmentsTabBtn = document.getElementById('departmentsTabBtn');
-            const deptProductsTabBtn = document.getElementById('deptProductsTabBtn');
-            const shoppingTabBtn = document.getElementById('shoppingTabBtn');
-            const loadListTabBtn = document.getElementById('loadListTabBtn');
-            const logoutBtn = document.getElementById('logoutBtn');
-            const authInfo = document.getElementById('authInfo');
-
-            if (currentUser) {
-                authTabBtn.style.display = 'none';
-                storesTabBtn.style.display = 'inline';
-                departmentsTabBtn.style.display = 'inline';
-                deptProductsTabBtn.style.display = 'inline';
-                shoppingTabBtn.style.display = 'inline';
-                loadListTabBtn.style.display = 'inline';
-                logoutBtn.style.display = 'inline';
-                authInfo.textContent = `Привет, ${currentUser}!`;
-                stores = users[currentUser].stores;
-                showTab('stores');
-                updateStoreList();
-            } else {
-                authTabBtn.style.display = 'inline';
-                storesTabBtn.style.display = 'none';
-                departmentsTabBtn.style.display = 'none';
-                deptProductsTabBtn.style.display = 'none';
-                shoppingTabBtn.style.display = 'none';
-                loadListTabBtn.style.display = 'none';
-                logoutBtn.style.display = 'none';
-                authInfo.textContent = '';
-                showTab('auth');
-            }
-        }
-
-        function register() {
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            if (username && password) {
-                if (users[username]) {
-                    alert('Пользователь с таким логином уже существует!');
-                } else {
-                    users[username] = { password, stores: {} };
-                    localStorage.setItem('users', JSON.stringify(users));
-                    alert('Регистрация успешна! Теперь войдите.');
-                    document.getElementById('username').value = '';
-                    document.getElementById('password').value = '';
+        function loadUsers() {
+            try {
+                const storedUsers = localStorage.getItem('users');
+                if (storedUsers) {
+                    users = JSON.parse(storedUsers) || {};
                 }
+            } catch (e) {
+                console.error('Error parsing users from localStorage:', e);
+                users = {};
+            }
+        }
+
+        function saveUsers() {
+            try {
+                localStorage.setItem('users', JSON.stringify(users));
+            } catch (e) {
+                console.error('Error saving users to localStorage:', e);
             }
         }
 
         function login() {
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            if (users[username] && users[username].password === password) {
+            const usernameInput = document.getElementById('username');
+            const passwordInput = document.getElementById('password');
+            if (!usernameInput || !passwordInput) return;
+
+            const username = usernameInput.value;
+            const password = passwordInput.value;
+            if (!users[username]) {
+                users[username] = { password, lists: {}, stores: {} };
+                saveUsers();
+            }
+            if (users[username].password === password) {
                 currentUser = username;
+                shoppingLists = users[username].lists || {};
+                defaultStores = users[username].stores || {};
                 updateAuthState();
+                updateListSelect();
+                updateStoreSelect();
+                updateStoreList();
+                alert('Вход выполнен!');
             } else {
-                alert('Неверный логин или пароль!');
+                alert('Неверный пароль!');
             }
         }
 
         function logout() {
-            saveStores();
             currentUser = null;
-            stores = {};
+            shoppingLists = {};
+            defaultStores = {};
+            selectedList = null;
             selectedStore = null;
             updateAuthState();
+            updateListSelect();
+            updateStoreSelect();
+            updateShoppingList();
+            updateStoreList();
         }
 
-        function saveStores() {
-            if (currentUser) {
-                users[currentUser].stores = stores;
-                localStorage.setItem('users', JSON.stringify(users));
+        function updateAuthState() {
+            const authInfo = document.getElementById('authInfo');
+            if (authInfo) {
+                authInfo.textContent = currentUser ? `Пользователь: ${currentUser}` : '';
+            }
+            const usernameInput = document.getElementById('username');
+            const passwordInput = document.getElementById('password');
+            if (usernameInput) usernameInput.value = '';
+            if (passwordInput) passwordInput.value = '';
+        }
+
+        function saveShoppingLists() {
+            if (currentUser && users[currentUser]) {
+                users[currentUser].lists = shoppingLists;
+                users[currentUser].stores = defaultStores;
+                saveUsers();
             }
         }
 
-        function addStore() {
-            const storeName = document.getElementById('storeName').value;
-            if (storeName && !stores[storeName]) {
-                stores[storeName] = { departments: [], shoppingList: [] };
-                saveStores();
-                updateStoreList();
-                document.getElementById('storeName').value = '';
-            } else if (!storeName) {
-                alert('Введите название магазина!');
-            } else {
-                alert('Магазин с таким названием уже существует!');
-            }
-        }
+        function updateListSelect() {
+            const listSelect = document.getElementById('listSelect');
+            const listSelectForShop = document.getElementById('listSelectForShop');
+            if (!listSelect || !listSelectForShop) return;
 
-        function updateStoreList() {
-            const list = document.getElementById('storeList');
-            list.innerHTML = '';
-            Object.keys(stores).forEach(store => {
-                const li = document.createElement('li');
-                li.textContent = store;
-                list.appendChild(li);
+            listSelect.innerHTML = '<option value="">Выберите список</option>';
+            listSelectForShop.innerHTML = '<option value="">Выберите список</option>';
+            Object.keys(shoppingLists).forEach(list => {
+                const option = document.createElement('option');
+                option.value = list;
+                option.textContent = list;
+                listSelect.appendChild(option);
+                listSelectForShop.appendChild(option.cloneNode(true));
             });
-            updateStoreSelect('storeSelectForDepts');
-            updateStoreSelect('storeSelectForProducts');
-            updateStoreSelect('storeSelect');
-            updateStoreSelect('storeSelectForLoad');
         }
 
-        function updateStoreSelect(selectId) {
-            const select = document.getElementById(selectId);
-            select.innerHTML = '<option value="">Выберите магазин</option>';
-            Object.keys(stores).forEach(store => {
+        function updateStoreSelect() {
+            const storeSelect = document.getElementById('storeSelect');
+            const storeSelectForDept = document.getElementById('storeSelectForDept');
+            if (!storeSelect || !storeSelectForDept) return;
+
+            storeSelect.innerHTML = '<option value="">Выберите магазин</option>';
+            storeSelectForDept.innerHTML = '<option value="">Выберите магазин</option>';
+            Object.keys(defaultStores).forEach(store => {
                 const option = document.createElement('option');
                 option.value = store;
                 option.textContent = store;
-                select.appendChild(option);
+                storeSelect.appendChild(option);
+                storeSelectForDept.appendChild(option.cloneNode(true));
             });
-            if (selectedStore) select.value = selectedStore;
-            if (selectId === 'storeSelectForDepts') updateDeptList();
-            if (selectId === 'storeSelectForProducts') updateDeptSelectForProducts();
-            if (selectId === 'storeSelect') updateDeptSelect();
-            if (selectId === 'storeSelectForLoad') updateShoppingList();
-        }
-
-        function addDepartment() {
-            const storeName = document.getElementById('storeSelectForDepts').value;
-            const name = document.getElementById('deptName').value;
-            const order = parseInt(document.getElementById('deptOrder').value);
-
-            if (!storeName) {
-                alert('Выберите магазин!');
-                return;
-            }
-
-            if (name && !isNaN(order)) {
-                selectedStore = storeName;
-                stores[selectedStore].departments.push({ name, order, products: [] });
-                saveStores();
-                updateDeptList();
-                document.getElementById('deptName').value = '';
-                document.getElementById('deptOrder').value = '';
-            }
-        }
-
-        function updateDeptList() {
-            const storeName = document.getElementById('storeSelectForDepts').value;
-            const list = document.getElementById('deptList');
-            list.innerHTML = '';
-            if (storeName && stores[storeName]) {
-                selectedStore = storeName;
-                stores[selectedStore].departments.forEach(dept => {
-                    const li = document.createElement('li');
-                    li.textContent = `${dept.order}. ${dept.name}`;
-                    list.appendChild(li);
-                });
-            }
-        }
-
-        function updateDeptSelectForProducts() {
-            const storeName = document.getElementById('storeSelectForProducts').value;
-            const select = document.getElementById('deptSelectForProducts');
-            select.innerHTML = '<option value="">Выберите отдел</option>';
-            if (storeName && stores[storeName]) {
-                selectedStore = storeName;
-                stores[selectedStore].departments.forEach(dept => {
-                    const option = document.createElement('option');
-                    option.value = dept.name;
-                    option.textContent = dept.name;
-                    select.appendChild(option);
-                });
-                updateProductList();
-            }
-        }
-
-        function addProductToDept() {
-            const storeName = document.getElementById('storeSelectForProducts').value;
-            const deptName = document.getElementById('deptSelectForProducts').value;
-            const product = document.getElementById('productName').value;
-
-            if (!storeName) {
-                alert('Выберите магазин!');
-                return;
-            }
-
-            if (storeName && deptName && product) {
-                selectedStore = storeName;
-                const dept = stores[storeName].departments.find(d => d.name === deptName);
-                if (dept && !dept.products.includes(product)) {
-                    dept.products.push(product);
-                    saveStores();
-                    updateProductList();
-                    document.getElementById('productName').value = '';
-                }
-            }
-        }
-
-        function updateProductList() {
-            const storeName = document.getElementById('storeSelectForProducts').value;
-            const deptName = document.getElementById('deptSelectForProducts').value;
-            const list = document.getElementById('productList');
-            list.innerHTML = '';
-            if (storeName && deptName && stores[storeName]) {
-                const dept = stores[storeName].departments.find(d => d.name === deptName);
-                if (dept) {
-                    dept.products.forEach(product => {
-                        const li = document.createElement('li');
-                        li.textContent = product;
-                        list.appendChild(li);
-                    });
-                }
-            }
+            updateDeptSelect();
         }
 
         function updateDeptSelect() {
-            const storeName = document.getElementById('storeSelect').value;
-            const select = document.getElementById('deptSelect');
-            select.innerHTML = '<option value="">Выберите отдел</option>';
-            if (storeName && stores[storeName]) {
-                selectedStore = storeName;
-                stores[selectedStore].departments.forEach(dept => {
+            const storeSelect = document.getElementById('storeSelect');
+            const deptSelect = document.getElementById('deptSelect');
+            if (!storeSelect || !deptSelect) return;
+
+            const storeName = storeSelect.value;
+            deptSelect.innerHTML = '<option value="">Выберите отдел</option>';
+            if (storeName && defaultStores[storeName]) {
+                defaultStores[storeName].departments.sort((a, b) => a.order - b.order).forEach(dept => {
                     const option = document.createElement('option');
                     option.value = dept.name;
                     option.textContent = dept.name;
-                    select.appendChild(option);
+                    deptSelect.appendChild(option);
                 });
-                updateProductSelect();
             }
+            updateProductSelect();
         }
 
         function updateProductSelect() {
-            const storeName = document.getElementById('storeSelect').value;
-            const deptName = document.getElementById('deptSelect').value;
-            const select = document.getElementById('productSelect');
-            select.innerHTML = '<option value="">Выберите продукт</option>';
-            if (storeName && deptName && stores[storeName]) {
-                const dept = stores[storeName].departments.find(d => d.name === deptName);
+            const storeSelect = document.getElementById('storeSelect');
+            const deptSelect = document.getElementById('deptSelect');
+            const productSelect = document.getElementById('productSelect');
+            if (!storeSelect || !deptSelect || !productSelect) return;
+
+            const storeName = storeSelect.value;
+            const deptName = deptSelect.value;
+            productSelect.innerHTML = '<option value="">Выберите продукт</option>';
+            if (storeName && deptName && defaultStores[storeName]) {
+                const dept = defaultStores[storeName].departments.find(d => d.name === deptName);
                 if (dept) {
                     dept.products.forEach(product => {
                         const option = document.createElement('option');
                         option.value = product;
                         option.textContent = product;
-                        select.appendChild(option);
+                        productSelect.appendChild(option);
                     });
                 }
             }
         }
 
-        function showSuggestions() {
-            const storeName = document.getElementById('storeSelect').value;
-            const input = document.getElementById('customProduct').value.toLowerCase();
+        function createNewList() {
+            let listName = prompt('Введите название списка:', `Список ${Object.keys(shoppingLists).length + 1}`);
+            if (listName && !shoppingLists[listName]) {
+                shoppingLists[listName] = { store: '', items: [] };
+                selectedList = listName;
+                saveShoppingLists();
+                updateListSelect();
+                updateShoppingList();
+            } else if (shoppingLists[listName]) {
+                alert('Список с таким названием уже существует!');
+            }
+        }
+
+        function addStore() {
+            const storeNameInput = document.getElementById('storeName');
+            if (!storeNameInput) return;
+
+            const storeName = storeNameInput.value;
+            if (storeName && !defaultStores[storeName]) {
+                defaultStores[storeName] = { departments: [] };
+                saveShoppingLists();
+                updateStoreSelect();
+                updateStoreList();
+                storeNameInput.value = '';
+            } else if (defaultStores[storeName]) {
+                alert('Магазин с таким названием уже существует!');
+            }
+        }
+
+        function editStore(oldName) {
+            const newName = prompt('Введите новое название магазина:', oldName);
+            if (newName && newName !== oldName && !defaultStores[newName]) {
+                defaultStores[newName] = defaultStores[oldName];
+                delete defaultStores[oldName];
+                Object.values(shoppingLists).forEach(list => {
+                    if (list.store === oldName) list.store = newName;
+                });
+                saveShoppingLists();
+                updateStoreSelect();
+                updateStoreList();
+            } else if (defaultStores[newName]) {
+                alert('Магазин с таким названием уже существует!');
+            }
+        }
+
+        function deleteStore(storeName) {
+            if (confirm(`Вы уверены, что хотите удалить магазин "${storeName}"?`)) {
+                delete defaultStores[storeName];
+                Object.values(shoppingLists).forEach(list => {
+                    if (list.store === storeName) list.store = '';
+                });
+                saveShoppingLists();
+                updateStoreSelect();
+                updateStoreList();
+            }
+        }
+
+        function addDepartment() {
+            const storeSelectForDept = document.getElementById('storeSelectForDept');
+            const deptNameInput = document.getElementById('deptName');
+            const dept 中的 deptOrderInput = document.getElementById('deptOrder');
+            if (!storeSelectForDept || !deptNameInput || !deptOrderInput) return;
+
+            const storeName = storeSelectForDept.value;
+            const deptName = deptNameInput.value;
+            const deptOrder = parseInt(deptOrderInput.value) || 1;
+            if (storeName && deptName && defaultStores[storeName]) {
+                const existingDept = defaultStores[storeName].departments.find(d => d.name === deptName);
+                if (!existingDept) {
+                    defaultStores[storeName].departments.push({
+                        name: deptName,
+                        order: deptOrder,
+                        products: []
+                    });
+                    saveShoppingLists();
+                    updateDeptList();
+                    deptNameInput.value = '';
+                    deptOrderInput.value = '';
+                } else {
+                    alert('Отдел с таким названием уже существует!');
+                }
+            } else {
+                alert('Выберите магазин и введите название отдела!');
+            }
+        }
+
+        function editDepartment(storeName, oldDeptName) {
+            const newDeptName = prompt('Введите новое название отдела:', oldDeptName);
+            const newOrder = prompt('Введите новый порядок отдела:', defaultStores[storeName].departments.find(d => d.name === oldDeptName).order);
+            if (newDeptName && newDeptName !== oldDeptName && !defaultStores[storeName].departments.find(d => d.name === newDeptName)) {
+                const dept = defaultStores[storeName].departments.find(d => d.name === oldDeptName);
+                dept.name = newDeptName;
+                dept.order = parseInt(newOrder) || dept.order;
+                Object.values(shoppingLists).forEach(list => {
+                    list.items.forEach(item => {
+                        if (item.dept?.name === oldDeptName) item.dept.name = newDeptName;
+                    });
+                });
+                saveShoppingLists();
+                updateDeptList();
+            } else if (defaultStores[storeName].departments.find(d => d.name === newDeptName)) {
+                alert('Отдел с таким названием уже существует!');
+            }
+        }
+
+        function deleteDepartment(storeName, deptName) {
+            if (confirm(`Вы уверены, что хотите удалить отдел "${deptName}"?`)) {
+                defaultStores[storeName].departments = defaultStores[storeName].departments.filter(d => d.name !== deptName);
+                Object.values(shoppingLists).forEach(list => {
+                    list.items.forEach(item => {
+                        if (item.dept?.name === deptName) item.dept = null;
+                    });
+                });
+                saveShoppingLists();
+                updateDeptList();
+            }
+        }
+
+        function updateStoreList() {
+            const storeList = document.getElementById('storeList');
+            if (!storeList) return;
+
+            storeList.innerHTML = '';
+            Object.keys(defaultStores).forEach(store => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <span>${store}</span>
+                    <div class="edit-delete-controls">
+                        <button onclick="editStore('${store}')">✏️</button>
+                        <button onclick="deleteStore('${store}')">🗑️</button>
+                    </div>
+                `;
+                storeList.appendChild(li);
+            });
+            updateDeptList();
+        }
+
+        function updateDeptList() {
+            const storeSelectForDept = document.getElementById('storeSelectForDept');
+            const deptList = document.getElementById('deptList');
+            if (!storeSelectForDept || !deptList) return;
+
+            const storeName = storeSelectForDept.value;
+            deptList.innerHTML = '';
+            if (storeName && defaultStores[storeName]) {
+                defaultStores[storeName].departments.sort((a, b) => a.order - b.order).forEach(dept => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `
+                        <span>${dept.name} (Порядок: ${dept.order})</span>
+                        <div class="edit-delete-controls">
+                            <button onclick="editDepartment('${storeName}', '${dept.name}')">✏️</button>
+                            <button onclick="deleteDepartment('${storeName}', '${dept.name}')">🗑️</button>
+                        </div>
+                    `;
+                    deptList.appendChild(li);
+                });
+            }
+        }
+
+        function suggestProducts(input) {
             const suggestions = document.getElementById('suggestions');
+            if (!suggestions) return;
+
             suggestions.innerHTML = '';
             selectedSuggestionIndex = -1;
-            if (storeName && input && stores[storeName]) {
-                const allProducts = stores[storeName].departments.flatMap(dept => dept.products);
-                const filtered = allProducts.filter(product => product.toLowerCase().includes(input));
-                filtered.forEach((product, index) => {
+            if (input && selectedStore && defaultStores[selectedStore]) {
+                const matches = defaultStores[selectedStore].departments.flatMap(dept =>
+                    dept.products.filter(p => p.toLowerCase().includes(input.toLowerCase())).map(p => ({ product: p, dept }))
+                );
+                matches.forEach(({ product, dept }) => {
                     const div = document.createElement('div');
-                    div.textContent = product;
+                    div.textContent = `${product} (${dept.name})`;
                     div.onclick = () => {
-                        document.getElementById('customProduct').value = product;
-                        suggestions.innerHTML = '';
+                        const customProductInput = document.getElementById('customProduct');
+                        if (customProductInput) {
+                            customProductInput.value = product;
+                            suggestions.innerHTML = '';
+                            addItemFromInput();
+                        }
                     };
                     suggestions.appendChild(div);
                 });
@@ -602,8 +788,8 @@
         }
 
         function handleKey(event) {
-            const suggestions = document.getElementById('suggestions').children;
-            if (suggestions.length === 0) return;
+            const suggestions = document.getElementById('suggestions')?.children;
+            if (!suggestions || suggestions.length === 0) return;
 
             if (event.key === 'ArrowDown') {
                 selectedSuggestionIndex = Math.min(selectedSuggestionIndex + 1, suggestions.length - 1);
@@ -612,106 +798,136 @@
                 selectedSuggestionIndex = Math.max(selectedSuggestionIndex - 1, -1);
                 updateSuggestionHighlight();
             } else if (event.key === 'Enter' && selectedSuggestionIndex >= 0) {
-                document.getElementById('customProduct').value = suggestions[selectedSuggestionIndex].textContent;
-                document.getElementById('suggestions').innerHTML = '';
-                addItemFromInput();
-                event.preventDefault();
+                const customProductInput = document.getElementById('customProduct');
+                if (customProductInput) {
+                    customProductInput.value = suggestions[selectedSuggestionIndex].textContent;
+                    document.getElementById('suggestions').innerHTML = '';
+                    addItemFromInput();
+                    event.preventDefault();
+                }
             }
         }
 
         function updateSuggestionHighlight() {
-            const suggestions = document.getElementById('suggestions').children;
+            const suggestions = document.getElementById('suggestions')?.children;
+            if (!suggestions) return;
+
             for (let i = 0; i < suggestions.length; i++) {
-                suggestions[i].style.background = i === selectedSuggestionIndex ? '#f7f7f7' : 'white';
+                suggestions[i].style.background = i === selectedSuggestionIndex ? 'var(--background)' : 'var(--card-background)';
             }
         }
 
         function findDepartment(product) {
-            if (selectedStore && stores[selectedStore]) {
-                return stores[selectedStore].departments.find(dept => dept.products.includes(product));
+            if (selectedStore && defaultStores[selectedStore]) {
+                return defaultStores[selectedStore].departments.find(dept => dept.products.includes(product));
             }
             return null;
         }
 
         function addItemFromSelect() {
-            const storeName = document.getElementById('storeSelect').value;
-            const deptName = document.getElementById('deptSelect').value;
-            const product = document.getElementById('productSelect').value;
+            const storeSelect = document.getElementById('storeSelect');
+            const deptSelect = document.getElementById('deptSelect');
+            const productSelect = document.getElementById('productSelect');
+            if (!storeSelect || !deptSelect || !productSelect) return;
 
-            if (!storeName) {
-                alert('Выберите магазин!');
+            const storeName = storeSelect.value;
+            const deptName = deptSelect.value;
+            const product = productSelect.value;
+
+            if (!storeName || !selectedList) {
+                alert('Выберите магазин и список!');
                 return;
             }
 
-            const dept = deptName ? stores[storeName].departments.find(d => d.name === deptName) : null;
-
-            if (product && dept) {
+            if (product && deptName) {
                 selectedStore = storeName;
-                stores[storeName].shoppingList.push({ name: product, dept, isCustom: false, quantity: 1, comment: '' });
-                saveStores();
-                document.getElementById('productSelect').value = '';
+                const dept = defaultStores[storeName].departments.find(d => d.name === deptName);
+                shoppingLists[selectedList].items.push({
+                    name: product,
+                    dept: dept ? { name: dept.name, order: dept.order } : null,
+                    isCustom: false,
+                    quantity: 1,
+                    comment: '',
+                    completed: false
+                });
+                saveShoppingLists();
+                productSelect.value = '';
                 updateShoppingList();
             }
         }
 
         function addItemFromInput() {
-            const storeName = document.getElementById('storeSelect').value;
-            const customProduct = document.getElementById('customProduct').value;
+            const storeSelect = document.getElementById('storeSelect');
+            const customProductInput = document.getElementById('customProduct');
+            if (!storeSelect || !customProductInput) return;
 
-            if (!storeName) {
-                alert('Выберите магазин!');
+            const storeName = storeSelect.value;
+            const customProduct = customProductInput.value;
+
+            if (!storeName || !selectedList) {
+                alert('Выберите магазин и список!');
                 return;
             }
 
             if (customProduct) {
                 selectedStore = storeName;
                 const existingDept = findDepartment(customProduct);
-                if (existingDept) {
-                    stores[storeName].shoppingList.push({ name: customProduct, dept: existingDept, isCustom: false, quantity: 1, comment: '' });
-                } else {
-                    stores[storeName].shoppingList.push({ name: customProduct, dept: null, isCustom: true, quantity: 1, comment: '' });
-                }
-                saveStores();
-                document.getElementById('customProduct').value = '';
+                shoppingLists[selectedList].items.push({
+                    name: customProduct,
+                    dept: existingDept ? { name: existingDept.name, order: existingDept.order } : null,
+                    isCustom: !existingDept,
+                    quantity: 1,
+                    comment: '',
+                    completed: false
+                });
+                saveShoppingLists();
+                customProductInput.value = '';
                 document.getElementById('suggestions').innerHTML = '';
                 updateShoppingList();
             }
         }
 
         function saveAndSort() {
-            if (selectedStore && stores[selectedStore]) {
-                stores[selectedStore].shoppingList.sort((a, b) => {
-                    if (a.isCustom && !b.isCustom) return 1;
-                    if (!a.isCustom && b.isCustom) return -1;
-                    return a.dept.order - b.dept.order;
-                });
-                saveStores();
-                updateShoppingList();
+            if (!selectedList || !selectedStore) {
+                alert('Выберите список и магазин!');
+                return;
             }
+            shoppingLists[selectedList].items.sort((a, b) => {
+                if (a.isCustom && !b.isCustom) return 1;
+                if (!a.isCustom && b.isCustom) return -1;
+                return (a.dept ? a.dept.order : Infinity) - (b.dept ? b.dept.order : Infinity);
+            });
+            saveShoppingLists();
+            updateShoppingList();
         }
 
         function updateShoppingList() {
-            const storeName = document.getElementById('storeSelect').value || document.getElementById('storeSelectForLoad').value;
             const list = document.getElementById('shoppingList');
+            if (!list) return;
+
             list.innerHTML = '';
-            if (storeName && stores[storeName]) {
-                selectedStore = storeName;
-                stores[selectedStore].shoppingList.forEach((item, index) => {
+            const listSelectForShop = document.getElementById('listSelectForShop');
+            if (!listSelectForShop) return;
+
+            const selectedListForShop = listSelectForShop.value || selectedList;
+            if (selectedListForShop && shoppingLists[selectedListForShop]) {
+                selectedStore = shoppingLists[selectedListForShop].store;
+                shoppingLists[selectedListForShop].items.forEach((item, index) => {
                     const li = document.createElement('li');
                     li.innerHTML = `
                         <span>${item.dept ? `${item.name} (${item.dept.name})` : item.name}</span>
                         <div class="quantity-controls">
-                            <button onclick="changeQuantity(${index}, -1)">−</button>
-                            <input type="number" min="1" value="${item.quantity}" onchange="updateQuantity(${index}, this.value)">
-                            <button onclick="changeQuantity(${index}, 1)">+</button>
+                            <button onclick="changeQuantity('${selectedListForShop}', ${index}, -1)">−</button>
+                            <input type="number" min="1" value="${item.quantity}" onchange="updateQuantity('${selectedListForShop}', ${index}, this.value)">
+                            <button onclick="changeQuantity('${selectedListForShop}', ${index}, 1)">+</button>
                         </div>
-                        <input type="text" class="comment-input" placeholder="Комментарий" value="${item.comment || ''}" oninput="updateComment(${index}, this.value)">
+                        <input type="text" class="comment-input" placeholder="Комментарий" value="${item.comment || ''}" oninput="updateComment('${selectedListForShop}', ${index}, this.value)">
                     `;
                     li.onclick = (e) => {
                         if (e.target.tagName !== 'BUTTON' && e.target.tagName !== 'INPUT') {
-                            li.classList.toggle('completed');
-                            item.completed = li.classList.contains('completed');
-                            saveStores();
+                            item.completed = !item.completed;
+                            li.classList.toggle('completed', item.completed);
+                            saveShoppingLists();
                         }
                     };
                     if (item.completed) li.classList.add('completed');
@@ -720,72 +936,85 @@
             }
         }
 
-        function changeQuantity(index, delta) {
-            if (selectedStore && stores[selectedStore]) {
-                stores[selectedStore].shoppingList[index].quantity = Math.max(1, stores[selectedStore].shoppingList[index].quantity + delta);
-                saveStores();
+        function changeQuantity(listName, index, delta) {
+            if (listName && shoppingLists[listName]) {
+                shoppingLists[listName].items[index].quantity = Math.max(1, shoppingLists[listName].items[index].quantity + delta);
+                saveShoppingLists();
                 updateShoppingList();
             }
         }
 
-        function updateQuantity(index, value) {
-            if (selectedStore && stores[selectedStore]) {
-                const newValue = parseInt(value) || 1;
-                stores[selectedStore].shoppingList[index].quantity = Math.max(1, newValue);
-                saveStores();
+        function updateQuantity(listName, index, value) {
+            if (listName && shoppingLists[listName]) {
+                shoppingLists[listName].items[index].quantity = Math.max(1, parseInt(value) || 1);
+                saveShoppingLists();
                 updateShoppingList();
             }
         }
 
-        function updateComment(index, value) {
-            if (selectedStore && stores[selectedStore]) {
-                stores[selectedStore].shoppingList[index].comment = value;
-                saveStores();
+        function updateComment(listName, index, value) {
+            if (listName && shoppingLists[listName]) {
+                shoppingLists[listName].items[index].comment = value;
+                saveShoppingLists();
             }
         }
 
         function downloadList() {
-            if (selectedStore && stores[selectedStore]) {
-                const json = JSON.stringify(stores[selectedStore].shoppingList, null, 2);
+            if (selectedList && shoppingLists[selectedList]) {
+                const json = JSON.stringify(shoppingLists[selectedList].items, null, 2);
                 const blob = new Blob([json], { type: 'application/json' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `${selectedStore}_shopping_list.json`;
+                a.download = `${selectedList}_${shoppingLists[selectedList].store}.json`;
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
             } else {
-                alert('Выберите магазин для скачивания списка!');
+                alert('Выберите список для скачивания!');
             }
         }
 
         function loadListFromFile() {
-            const storeName = document.getElementById('storeSelectForLoad').value;
+            const storeSelect = document.getElementById('storeSelect');
+            const fileInput = document.getElementById('loadFile');
+            if (!storeSelect || !fileInput) return;
+
+            const storeName = storeSelect.value;
             if (!storeName) {
                 alert('Выберите магазин!');
                 return;
             }
 
-            const fileInput = document.getElementById('loadFile');
             const file = fileInput.files[0];
-            if (file && storeName) {
+            if (file) {
                 selectedStore = storeName;
                 const reader = new FileReader();
                 reader.onload = function(event) {
                     try {
                         const loadedList = JSON.parse(event.target.result);
                         if (Array.isArray(loadedList)) {
-                            stores[selectedStore].shoppingList = loadedList.map(item => ({
-                                name: item.name,
-                                dept: item.dept ? stores[selectedStore].departments.find(d => d.name === item.dept.name) || null : null,
-                                isCustom: item.isCustom || false,
-                                quantity: item.quantity || 1,
-                                comment: item.comment || '',
-                                completed: item.completed || false
-                            }));
-                            saveStores();
+                            let listName = prompt('Введите название для загружаемого списка:', `Список ${Object.keys(shoppingLists).length + 1}`);
+                            if (!listName) return;
+                            if (shoppingLists[listName]) {
+                                alert('Список с таким названием уже существует!');
+                                return;
+                            }
+                            shoppingLists[listName] = {
+                                store: storeName,
+                                items: loadedList.map(item => ({
+                                    name: item.name,
+                                    dept: defaultStores[storeName].departments.find(d => d.name === (item.dept?.name || '')) || null,
+                                    isCustom: item.isCustom || false,
+                                    quantity: item.quantity || 1,
+                                    comment: item.comment || '',
+                                    completed: item.completed || false
+                                }))
+                            };
+                            selectedList = listName;
+                            saveShoppingLists();
+                            updateListSelect();
                             updateShoppingList();
                             alert('Список успешно загружен!');
                         } else {
@@ -800,19 +1029,59 @@
         }
 
         // Инициализация
-        document.getElementById('deptSelectForProducts').onchange = updateProductList;
-        document.getElementById('deptSelect').onchange = updateProductSelect;
-        updateAuthState();
+        document.addEventListener('DOMContentLoaded', () => {
+            initTheme();
+            loadUsers();
+            updateAuthState();
+
+            // Event listeners
+            const shopTabBtn = document.getElementById('shopTabBtn');
+            const listsTabBtn = document.getElementById('listsTabBtn');
+            const storesTabBtn = document.getElementById('storesTabBtn');
+            const authTabBtn = document.getElementById('authTabBtn');
+            const themeToggle = document.getElementById('themeToggle');
+            const listSelectForShop = document.getElementById('listSelectForShop');
+            const listSelect = document.getElementById('listSelect');
+            const storeSelect = document.getElementById('storeSelect');
+            const deptSelect = document.getElementById('deptSelect');
+            const newListBtn = document.getElementById('newListBtn');
+            const downloadListBtn = document.getElementById('downloadListBtn');
+            const loadListBtn = document.getElementById('loadListBtn');
+            const addItemFromSelectBtn = document.getElementById('addItemFromSelectBtn');
+            const addItemFromInputBtn = document.getElementById('addItemFromInputBtn');
+            const saveAndSortBtn = document.getElementById('saveAndSortBtn');
+            const addStoreBtn = document.getElementById('addStoreBtn');
+            const addDepartmentBtn = document.getElementById('addDepartmentBtn');
+            const loginBtn = document.getElementById('loginBtn');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const customProductInput = document.getElementById('customProduct');
+            const loadFileInput = document.getElementById('loadFile');
+
+            if (shopTabBtn) shopTabBtn.onclick = () => showTab('shopTab', 'shopTabBtn');
+            if (listsTabBtn) listsTabBtn.onclick = () => showTab('listsTab', 'listsTabBtn');
+            if (storesTabBtn) storesTabBtn.onclick = () => showTab('storesTab', 'storesTabBtn');
+            if (authTabBtn) authTabBtn.onclick = () => showTab('authTab', 'authTabBtn');
+            if (themeToggle) themeToggle.onclick = toggleTheme;
+            if (listSelectForShop) listSelectForShop.onchange = updateShoppingList;
+            if (listSelect) listSelect.onchange = () => { selectedList = listSelect.value; updateShoppingList(); };
+            if (storeSelect) storeSelect.onchange = updateDeptSelect;
+            if (deptSelect) deptSelect.onchange = updateProductSelect;
+            if (newListBtn) newListBtn.onclick = createNewList;
+            if (downloadListBtn) downloadListBtn.onclick = downloadList;
+            if (loadListBtn) loadListBtn.onclick = () => loadFileInput?.click();
+            if (addItemFromSelectBtn) addItemFromSelectBtn.onclick = addItemFromSelect;
+            if (addItemFromInputBtn) addItemFromInputBtn.onclick = addItemFromInput;
+            if (saveAndSortBtn) saveAndSortBtn.onclick = saveAndSort;
+            if (addStoreBtn) addStoreBtn.onclick = addStore;
+            if (addDepartmentBtn) addDepartmentBtn.onclick = addDepartment;
+            if (loginBtn) loginBtn.onclick = login;
+            if (logoutBtn) logoutBtn.onclick = logout;
+            if (customProductInput) {
+                customProductInput.oninput = () => suggestProducts(customProductInput.value);
+                customProductInput.onkeydown = handleKey;
+            }
+            if (loadFileInput) loadFileInput.onchange = loadListFromFile;
+        });
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
