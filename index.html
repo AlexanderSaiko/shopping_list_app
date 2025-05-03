@@ -3,159 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Список покупок</title>
+    <title>Список покупок | Udemy Style</title>
     <style>
-        :root {
-            --background: #f2f2f7;
-            --card-background: #ffffff;
-            --text: #000000;
-            --secondary-text: #6e6e73;
-            --accent: #007aff;
-            --button-background: #007aff;
-            --button-text: #ffffff;
-            --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            --border: #d1d1d6;
-        }
-
-        [data-theme="dark"] {
-            --background: #1c1c1e;
-            --card-background: #2c2c2e;
-            --text: #ffffff;
-            --secondary-text: #8e8e93;
-            --accent: #0a84ff;
-            --button-background: #0a84ff;
-            --button-text: #ffffff;
-            --shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-            --border: #3c3c3e;
-        }
-
-        * {
-            box-sizing: border-box;
+        body {
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             margin: 0;
             padding: 0;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro', sans-serif;
-            background: var(--background);
-            color: var(--text);
-            transition: all 0.3s ease;
+            background: #f7f7f7;
+            color: #1c1d1f;
         }
 
         header {
-            background: var(--card-background);
-            padding: 12px 16px;
+            background: #1c1d1f;
+            padding: 10px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: var(--shadow);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             position: sticky;
             top: 0;
             z-index: 100;
         }
 
         header h1 {
-            font-size: 20px;
-            font-weight: 600;
-            color: var(--text);
+            color: white;
+            font-size: 24px;
+            margin: 0;
         }
 
         nav {
             display: flex;
+            flex-wrap: wrap;
             align-items: center;
-            gap: 8px;
         }
 
         nav button {
             background: none;
             border: none;
-            color: var(--secondary-text);
+            color: #a1a1a6;
             font-size: 16px;
-            padding: 8px 12px;
+            padding: 10px 15px;
             cursor: pointer;
-            transition: color 0.3s ease;
+            transition: color 0.3s;
         }
 
-        nav button.active, nav button:hover {
-            color: var(--accent);
-        }
-
-        .theme-toggle {
-            background: none;
-            border: none;
-            font-size: 20px;
-            cursor: pointer;
-            color: var(--secondary-text);
+        nav button:hover, nav button.active {
+            color: white;
         }
 
         .container {
-            max-width: 600px;
-            margin: 16px auto;
-            padding: 0 16px;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         }
 
-        .tab {
-            display: none;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .tab.active {
-            display: block;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        .tab { display: none; }
+        .tab.active { display: block; }
 
         h2 {
             font-size: 24px;
-            font-weight: 600;
-            margin-bottom: 16px;
-            color: var(--text);
+            margin-bottom: 20px;
+            color: #1c1d1f;
         }
 
-        select, input[type="text"], input[type="number"], input[type="password"] {
+        select, input[type="text"], input[type="number"], input[type="file"], input[type="password"] {
             width: 100%;
-            padding: 12px;
-            margin: 8px 0;
-            border: 1px solid var(--border);
-            border-radius: 10px;
+            max-width: 300px;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #d1d7dc;
+            border-radius: 4px;
             font-size: 16px;
-            background: var(--card-background);
-            color: var(--text);
-            appearance: none;
-            transition: border-color 0.3s ease;
-        }
-
-        select:focus, input:focus {
-            outline: none;
-            border-color: var(--accent);
+            box-sizing: border-box;
         }
 
         button {
-            background: var(--button-background);
-            color: var(--button-text);
+            background: #ec5252;
+            color: white;
             border: none;
-            padding: 12px 20px;
-            border-radius: 10px;
+            padding: 10px 20px;
+            border-radius: 4px;
             font-size: 16px;
-            font-weight: 500;
             cursor: pointer;
-            transition: background 0.3s ease;
-            margin: 8px 4px;
-            display: inline-block;
+            transition: background 0.3s;
+            margin: 10px 0;
         }
 
         button:hover {
-            background: var(--accent);
-            filter: brightness(1.1);
-        }
-
-        button.secondary {
-            background: var(--card-background);
-            color: var(--accent);
-            border: 1px solid var(--border);
+            background: #d43f3f;
         }
 
         ul {
@@ -164,41 +102,36 @@
         }
 
         ul li {
-            background: var(--card-background);
-            padding: 12px;
-            margin: 8px 0;
-            border-radius: 10px;
+            padding: 10px;
             font-size: 16px;
+            border-bottom: 1px solid #f1f1f1;
             display: flex;
             align-items: center;
             flex-wrap: wrap;
-            gap: 8px;
-            box-shadow: var(--shadow);
-            transition: transform 0.2s ease;
-        }
-
-        ul li:hover {
-            transform: translateY(-2px);
+            gap: 10px;
         }
 
         ul li.completed {
             text-decoration: line-through;
-            color: var(--secondary-text);
+            color: #787878;
         }
 
         .quantity-controls {
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 5px;
         }
 
         .quantity-controls button {
-            background: var(--card-background);
-            color: var(--accent);
-            padding: 8px;
+            background: #f1f1f1;
+            color: #1c1d1f;
+            padding: 5px 10px;
             font-size: 14px;
             margin: 0;
-            border: 1px solid var(--border);
+        }
+
+        .quantity-controls button:hover {
+            background: #e0e0e0;
         }
 
         .quantity-controls input {
@@ -215,81 +148,63 @@
 
         #suggestions {
             position: absolute;
-            background: var(--card-background);
-            border: 1px solid var(--border);
+            background: white;
+            border: 1px solid #d1d7dc;
             max-height: 150px;
             overflow-y: auto;
             z-index: 10;
             width: 100%;
             max-width: 300px;
-            border-radius: 10px;
-            box-shadow: var(--shadow);
+            border-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
         #suggestions div {
-            padding: 12px;
+            padding: 10px;
             cursor: pointer;
-            color: var(--text);
         }
 
         #suggestions div:hover {
-            background: var(--background);
+            background: #f7f7f7;
         }
 
         .auth-info {
-            color: var(--secondary-text);
+            color: #a1a1a6;
             font-size: 14px;
-            margin-left: 8px;
+            margin-left: 10px;
         }
 
-        .list-controls {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 16px;
-        }
-
-        .list-controls select {
-            max-width: 200px;
-        }
-
-        .list-controls button {
-            padding: 8px 12px;
-            font-size: 14px;
-        }
-
+        /* Адаптивность для iPhone 13 и выше */
         @media (max-width: 430px) {
             header {
                 flex-direction: column;
-                padding: 8px;
-                gap: 8px;
+                padding: 10px;
             }
 
             header h1 {
-                font-size: 18px;
+                font-size: 20px;
             }
 
             nav {
                 justify-content: center;
                 width: 100%;
-                flex-wrap: wrap;
             }
 
             nav button {
                 font-size: 14px;
-                padding: 6px 8px;
+                padding: 8px 10px;
             }
 
             .container {
-                margin: 8px;
-                padding: 0 8px;
+                margin: 10px;
+                padding: 15px;
             }
 
             h2 {
                 font-size: 20px;
             }
 
-            select, input[type="text"], input[type="number"], input[type="password"] {
+            select, input[type="text"], input[type="number"], input[type="file"], input[type="password"] {
                 max-width: 100%;
             }
 
@@ -317,16 +232,7 @@
             }
 
             .auth-info {
-                margin-top: 8px;
-            }
-
-            .list-controls {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .list-controls select {
-                max-width: 100%;
+                margin-top: 10px;
             }
         }
     </style>
@@ -336,29 +242,57 @@
         <h1>Список покупок</h1>
         <nav>
             <button onclick="showTab('auth')" id="authTabBtn">Войти</button>
-            <button onclick="showTab('shopping')" id="shoppingTabBtn" style="display: none;">Списки</button>
-            <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+            <button onclick="showTab('stores')" id="storesTabBtn" style="display: none;">Магазины</button>
+            <button onclick="showTab('departments')" id="departmentsTabBtn" style="display: none;">Отделы</button>
+            <button onclick="showTab('deptProducts')" id="deptProductsTabBtn" style="display: none;">Продукты отделов</button>
+            <button onclick="showTab('shopping')" id="shoppingTabBtn" style="display: none;">Список покупок</button>
+            <button onclick="showTab('loadList')" id="loadListTabBtn" style="display: none;">Загрузить список</button>
             <span class="auth-info" id="authInfo"></span>
         </nav>
     </header>
 
     <div class="container">
+        <!-- Вкладка авторизации -->
         <div id="auth" class="tab active">
             <h2>Вход / Регистрация</h2>
             <input id="username" type="text" placeholder="Логин">
             <input id="password" type="password" placeholder="Пароль">
             <button onclick="register()">Регистрация</button>
-            <button class="secondary" onclick="login()">Вход</button>
+            <button onclick="login()">Вход</button>
             <button onclick="logout()" id="logoutBtn" style="display: none;">Выйти</button>
         </div>
 
+        <!-- Вкладка магазинов -->
+        <div id="stores" class="tab">
+            <h2>Магазины</h2>
+            <input id="storeName" placeholder="Название магазина">
+            <button onclick="addStore()">Добавить магазин</button>
+            <ul id="storeList"></ul>
+        </div>
+
+        <!-- Вкладка отделов -->
+        <div id="departments" class="tab">
+            <h2>Настройка отделов</h2>
+            <select id="storeSelectForDepts" onchange="updateDeptList()"></select>
+            <input id="deptName" placeholder="Название отдела">
+            <input id="deptOrder" type="number" placeholder="Порядок">
+            <button onclick="addDepartment()">Добавить</button>
+            <ul id="deptList"></ul>
+        </div>
+
+        <!-- Вкладка продуктов отделов -->
+        <div id="deptProducts" class="tab">
+            <h2>Продукты отделов</h2>
+            <select id="storeSelectForProducts" onchange="updateDeptSelectForProducts()"></select>
+            <select id="deptSelectForProducts"></select>
+            <input id="productName" placeholder="Новый продукт">
+            <button onclick="addProductToDept()">Добавить</button>
+            <ul id="productList"></ul>
+        </div>
+
+        <!-- Вкладка списка покупок -->
         <div id="shopping" class="tab">
-            <h2>Списки покупок</h2>
-            <div class="list-controls">
-                <select id="listSelect" onchange="changeList()"></select>
-                <button onclick="addNewList()">+ Новый</button>
-                <button class="secondary" onclick="deleteList()">− Удалить</button>
-            </div>
+            <h2>Список покупок</h2>
             <select id="storeSelect" onchange="updateDeptSelect()"></select>
             <select id="deptSelect"></select>
             <select id="productSelect" onchange="addItemFromSelect()"></select>
@@ -366,99 +300,71 @@
                 <input id="customProduct" placeholder="Произвольный продукт" oninput="showSuggestions()" onkeydown="handleKey(event)">
                 <div id="suggestions"></div>
             </div>
-            <button onclick="addItemFromInput()">Добавить</button>
-            <button class="secondary" onclick="saveAndSort()">Сортировать</button>
-            <button class="secondary" onclick="downloadList()">Скачать (JSON)</button>
+            <button onclick="addItemFromInput()">Добавить в список</button>
+            <button onclick="saveAndSort()">Сохранить и отсортировать</button>
+            <button onclick="downloadList()">Скачать список (JSON)</button>
             <ul id="shoppingList"></ul>
+        </div>
+
+        <!-- Вкладка загрузки списка -->
+        <div id="loadList" class="tab">
+            <h2>Загрузить список</h2>
+            <select id="storeSelectForLoad" onchange="updateShoppingList()"></select>
+            <input type="file" id="loadFile" accept=".json" onchange="loadListFromFile()">
+            <p>Выберите JSON-файл со списком покупок для загрузки.</p>
         </div>
     </div>
 
     <script>
-        // Конфигурации магазинов
-        const defaultStores = {
-            'Лента': {
-                departments: [
-                    { name: 'Молочные продукты', order: 1, products: ['Молоко', 'Сыр', 'Йогурт'] },
-                    { name: 'Мясо и рыба', order: 2, products: ['Курица', 'Говядина', 'Рыба'] },
-                    { name: 'Овощи и фрукты', order: 3, products: ['Яблоки', 'Морковь', 'Бананы'] }
-                ]
-            },
-            'Перекресток': {
-                departments: [
-                    { name: 'Бакалея', order: 1, products: ['Макароны', 'Рис', 'Гречка'] },
-                    { name: 'Напитки', order: 2, products: ['Вода', 'Сок', 'Чай'] },
-                    { name: 'Кондитерские изделия', order: 3, products: ['Шоколад', 'Печенье', 'Торт'] }
-                ]
-            }
-        };
-
+        let users = JSON.parse(localStorage.getItem('users')) || {};
         let currentUser = null;
-        let shoppingLists = {};
+        let stores = {};
         let selectedStore = null;
-        let selectedList = null;
         let selectedSuggestionIndex = -1;
-        let users = {};
-
-        // Инициализация темы
-        function initTheme() {
-            const savedTheme = localStorage.getItem('theme') || 'light';
-            document.body.setAttribute('data-theme', savedTheme);
-            document.querySelector('.theme-toggle').textContent = savedTheme === 'dark' ? '☀️' : '🌙';
-        }
-
-        function toggleTheme() {
-            const currentTheme = document.body.getAttribute('data-theme') || 'light';
-            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-            document.body.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-            document.querySelector('.theme-toggle').textContent = newTheme === 'dark' ? '☀️' : '🌙';
-        }
-
-        function loadUsers() {
-            const storedUsers = localStorage.getItem('users');
-            users = storedUsers ? JSON.parse(storedUsers) : {};
-        }
-
-        function saveUsers() {
-            localStorage.setItem('users', JSON.stringify(users));
-        }
-
-        function loadShoppingLists() {
-            const storedLists = localStorage.getItem(`shoppingLists_${currentUser}`);
-            shoppingLists = storedLists ? JSON.parse(storedLists) : {};
-        }
-
-        function saveShoppingLists() {
-            localStorage.setItem(`shoppingLists_${currentUser}`, JSON.stringify(shoppingLists));
-        }
 
         function showTab(tabId) {
             document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
             document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('active'));
             document.querySelector(`nav button[onclick="showTab('${tabId}')"]`).classList.add('active');
-            if (currentUser && tabId === 'shopping') {
-                updateListSelect();
-                updateStoreSelect('storeSelect');
+            if (currentUser) {
+                if (tabId === 'stores') updateStoreList();
+                if (tabId === 'departments') updateStoreSelect('storeSelectForDepts');
+                if (tabId === 'deptProducts') updateStoreSelect('storeSelectForProducts');
+                if (tabId === 'shopping') updateStoreSelect('storeSelect');
+                if (tabId === 'loadList') updateStoreSelect('storeSelectForLoad');
             }
         }
 
         function updateAuthState() {
             const authTabBtn = document.getElementById('authTabBtn');
+            const storesTabBtn = document.getElementById('storesTabBtn');
+            const departmentsTabBtn = document.getElementById('departmentsTabBtn');
+            const deptProductsTabBtn = document.getElementById('deptProductsTabBtn');
             const shoppingTabBtn = document.getElementById('shoppingTabBtn');
+            const loadListTabBtn = document.getElementById('loadListTabBtn');
             const logoutBtn = document.getElementById('logoutBtn');
             const authInfo = document.getElementById('authInfo');
 
             if (currentUser) {
                 authTabBtn.style.display = 'none';
+                storesTabBtn.style.display = 'inline';
+                departmentsTabBtn.style.display = 'inline';
+                deptProductsTabBtn.style.display = 'inline';
                 shoppingTabBtn.style.display = 'inline';
+                loadListTabBtn.style.display = 'inline';
                 logoutBtn.style.display = 'inline';
                 authInfo.textContent = `Привет, ${currentUser}!`;
-                loadShoppingLists();
-                showTab('shopping');
+                stores = users[currentUser].stores;
+                showTab('stores');
+                updateStoreList();
             } else {
                 authTabBtn.style.display = 'inline';
+                storesTabBtn.style.display = 'none';
+                departmentsTabBtn.style.display = 'none';
+                deptProductsTabBtn.style.display = 'none';
                 shoppingTabBtn.style.display = 'none';
+                loadListTabBtn.style.display = 'none';
                 logoutBtn.style.display = 'none';
                 authInfo.textContent = '';
                 showTab('auth');
@@ -468,16 +374,16 @@
         function register() {
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
-            if (!username || !password) return;
-
-            if (users[username]) {
-                alert('Пользователь с таким логином уже существует!');
-            } else {
-                users[username] = { password };
-                saveUsers();
-                alert('Регистрация успешна! Теперь войдите.');
-                document.getElementById('username').value = '';
-                document.getElementById('password').value = '';
+            if (username && password) {
+                if (users[username]) {
+                    alert('Пользователь с таким логином уже существует!');
+                } else {
+                    users[username] = { password, stores: {} };
+                    localStorage.setItem('users', JSON.stringify(users));
+                    alert('Регистрация успешна! Теперь войдите.');
+                    document.getElementById('username').value = '';
+                    document.getElementById('password').value = '';
+                }
             }
         }
 
@@ -486,7 +392,6 @@
             const password = document.getElementById('password').value;
             if (users[username] && users[username].password === password) {
                 currentUser = username;
-                loadShoppingLists();
                 updateAuthState();
             } else {
                 alert('Неверный логин или пароль!');
@@ -494,90 +399,150 @@
         }
 
         function logout() {
-            if (currentUser) {
-                saveShoppingLists();
-            }
+            saveStores();
             currentUser = null;
-            shoppingLists = {};
+            stores = {};
             selectedStore = null;
-            selectedList = null;
             updateAuthState();
         }
 
-        function updateListSelect() {
-            const select = document.getElementById('listSelect');
-            select.innerHTML = '<option value="">Выберите список</option>';
-            Object.keys(shoppingLists).forEach(listName => {
-                const option = document.createElement('option');
-                option.value = listName;
-                option.textContent = listName;
-                select.appendChild(option);
-            });
-            if (selectedList && shoppingLists[selectedList]) {
-                select.value = selectedList;
-                selectedStore = shoppingLists[selectedList].store;
-                updateStoreSelect('storeSelect');
-                updateShoppingList();
+        function saveStores() {
+            if (currentUser) {
+                users[currentUser].stores = stores;
+                localStorage.setItem('users', JSON.stringify(users));
             }
         }
 
-        function addNewList() {
-            let listName = prompt('Введите название нового списка:', `Список ${Object.keys(shoppingLists).length + 1}`);
-            if (!listName) return;
-            if (shoppingLists[listName]) {
-                alert('Список с таким названием уже существует!');
-                return;
-            }
-            shoppingLists[listName] = { store: Object.keys(defaultStores)[0], items: [] };
-            selectedList = listName;
-            selectedStore = shoppingLists[listName].store;
-            saveShoppingLists();
-            updateListSelect();
-        }
-
-        function deleteList() {
-            const listName = document.getElementById('listSelect').value;
-            if (!listName) {
-                alert('Выберите список для удаления!');
-                return;
-            }
-            if (confirm(`Удалить список "${listName}"?`)) {
-                delete shoppingLists[listName];
-                if (selectedList === listName) {
-                    selectedList = null;
-                    selectedStore = null;
-                }
-                saveShoppingLists();
-                updateListSelect();
-            }
-        }
-
-        function changeList() {
-            const listName = document.getElementById('listSelect').value;
-            if (listName && shoppingLists[listName]) {
-                selectedList = listName;
-                selectedStore = shoppingLists[listName].store;
-                updateStoreSelect('storeSelect');
-                updateShoppingList();
+        function addStore() {
+            const storeName = document.getElementById('storeName').value;
+            if (storeName && !stores[storeName]) {
+                stores[storeName] = { departments: [], shoppingList: [] };
+                saveStores();
+                updateStoreList();
+                document.getElementById('storeName').value = '';
+            } else if (!storeName) {
+                alert('Введите название магазина!');
             } else {
-                selectedList = null;
-                selectedStore = null;
-                updateShoppingList();
+                alert('Магазин с таким названием уже существует!');
             }
+        }
+
+        function updateStoreList() {
+            const list = document.getElementById('storeList');
+            list.innerHTML = '';
+            Object.keys(stores).forEach(store => {
+                const li = document.createElement('li');
+                li.textContent = store;
+                list.appendChild(li);
+            });
+            updateStoreSelect('storeSelectForDepts');
+            updateStoreSelect('storeSelectForProducts');
+            updateStoreSelect('storeSelect');
+            updateStoreSelect('storeSelectForLoad');
         }
 
         function updateStoreSelect(selectId) {
             const select = document.getElementById(selectId);
             select.innerHTML = '<option value="">Выберите магазин</option>';
-            Object.keys(defaultStores).forEach(store => {
+            Object.keys(stores).forEach(store => {
                 const option = document.createElement('option');
                 option.value = store;
                 option.textContent = store;
                 select.appendChild(option);
             });
-            if (selectedStore) {
-                select.value = selectedStore;
-                if (selectId === 'storeSelect') updateDeptSelect();
+            if (selectedStore) select.value = selectedStore;
+            if (selectId === 'storeSelectForDepts') updateDeptList();
+            if (selectId === 'storeSelectForProducts') updateDeptSelectForProducts();
+            if (selectId === 'storeSelect') updateDeptSelect();
+            if (selectId === 'storeSelectForLoad') updateShoppingList();
+        }
+
+        function addDepartment() {
+            const storeName = document.getElementById('storeSelectForDepts').value;
+            const name = document.getElementById('deptName').value;
+            const order = parseInt(document.getElementById('deptOrder').value);
+
+            if (!storeName) {
+                alert('Выберите магазин!');
+                return;
+            }
+
+            if (name && !isNaN(order)) {
+                selectedStore = storeName;
+                stores[selectedStore].departments.push({ name, order, products: [] });
+                saveStores();
+                updateDeptList();
+                document.getElementById('deptName').value = '';
+                document.getElementById('deptOrder').value = '';
+            }
+        }
+
+        function updateDeptList() {
+            const storeName = document.getElementById('storeSelectForDepts').value;
+            const list = document.getElementById('deptList');
+            list.innerHTML = '';
+            if (storeName && stores[storeName]) {
+                selectedStore = storeName;
+                stores[selectedStore].departments.forEach(dept => {
+                    const li = document.createElement('li');
+                    li.textContent = `${dept.order}. ${dept.name}`;
+                    list.appendChild(li);
+                });
+            }
+        }
+
+        function updateDeptSelectForProducts() {
+            const storeName = document.getElementById('storeSelectForProducts').value;
+            const select = document.getElementById('deptSelectForProducts');
+            select.innerHTML = '<option value="">Выберите отдел</option>';
+            if (storeName && stores[storeName]) {
+                selectedStore = storeName;
+                stores[selectedStore].departments.forEach(dept => {
+                    const option = document.createElement('option');
+                    option.value = dept.name;
+                    option.textContent = dept.name;
+                    select.appendChild(option);
+                });
+                updateProductList();
+            }
+        }
+
+        function addProductToDept() {
+            const storeName = document.getElementById('storeSelectForProducts').value;
+            const deptName = document.getElementById('deptSelectForProducts').value;
+            const product = document.getElementById('productName').value;
+
+            if (!storeName) {
+                alert('Выберите магазин!');
+                return;
+            }
+
+            if (storeName && deptName && product) {
+                selectedStore = storeName;
+                const dept = stores[storeName].departments.find(d => d.name === deptName);
+                if (dept && !dept.products.includes(product)) {
+                    dept.products.push(product);
+                    saveStores();
+                    updateProductList();
+                    document.getElementById('productName').value = '';
+                }
+            }
+        }
+
+        function updateProductList() {
+            const storeName = document.getElementById('storeSelectForProducts').value;
+            const deptName = document.getElementById('deptSelectForProducts').value;
+            const list = document.getElementById('productList');
+            list.innerHTML = '';
+            if (storeName && deptName && stores[storeName]) {
+                const dept = stores[storeName].departments.find(d => d.name === deptName);
+                if (dept) {
+                    dept.products.forEach(product => {
+                        const li = document.createElement('li');
+                        li.textContent = product;
+                        list.appendChild(li);
+                    });
+                }
             }
         }
 
@@ -585,17 +550,15 @@
             const storeName = document.getElementById('storeSelect').value;
             const select = document.getElementById('deptSelect');
             select.innerHTML = '<option value="">Выберите отдел</option>';
-            if (storeName && defaultStores[storeName]) {
+            if (storeName && stores[storeName]) {
                 selectedStore = storeName;
-                if (selectedList) shoppingLists[selectedList].store = storeName;
-                defaultStores[storeName].departments.forEach(dept => {
+                stores[selectedStore].departments.forEach(dept => {
                     const option = document.createElement('option');
                     option.value = dept.name;
                     option.textContent = dept.name;
                     select.appendChild(option);
                 });
                 updateProductSelect();
-                saveShoppingLists();
             }
         }
 
@@ -604,8 +567,8 @@
             const deptName = document.getElementById('deptSelect').value;
             const select = document.getElementById('productSelect');
             select.innerHTML = '<option value="">Выберите продукт</option>';
-            if (storeName && deptName && defaultStores[storeName]) {
-                const dept = defaultStores[storeName].departments.find(d => d.name === deptName);
+            if (storeName && deptName && stores[storeName]) {
+                const dept = stores[storeName].departments.find(d => d.name === deptName);
                 if (dept) {
                     dept.products.forEach(product => {
                         const option = document.createElement('option');
@@ -623,8 +586,8 @@
             const suggestions = document.getElementById('suggestions');
             suggestions.innerHTML = '';
             selectedSuggestionIndex = -1;
-            if (storeName && input && defaultStores[storeName]) {
-                const allProducts = defaultStores[storeName].departments.flatMap(dept => dept.products);
+            if (storeName && input && stores[storeName]) {
+                const allProducts = stores[storeName].departments.flatMap(dept => dept.products);
                 const filtered = allProducts.filter(product => product.toLowerCase().includes(input));
                 filtered.forEach((product, index) => {
                     const div = document.createElement('div');
@@ -659,13 +622,13 @@
         function updateSuggestionHighlight() {
             const suggestions = document.getElementById('suggestions').children;
             for (let i = 0; i < suggestions.length; i++) {
-                suggestions[i].style.background = i === selectedSuggestionIndex ? 'var(--background)' : 'var(--card-background)';
+                suggestions[i].style.background = i === selectedSuggestionIndex ? '#f7f7f7' : 'white';
             }
         }
 
         function findDepartment(product) {
-            if (selectedStore && defaultStores[selectedStore]) {
-                return defaultStores[selectedStore].departments.find(dept => dept.products.includes(product));
+            if (selectedStore && stores[selectedStore]) {
+                return stores[selectedStore].departments.find(dept => dept.products.includes(product));
             }
             return null;
         }
@@ -675,23 +638,17 @@
             const deptName = document.getElementById('deptSelect').value;
             const product = document.getElementById('productSelect').value;
 
-            if (!storeName || !selectedList) {
-                alert('Выберите магазин и список!');
+            if (!storeName) {
+                alert('Выберите магазин!');
                 return;
             }
 
-            if (product && deptName) {
+            const dept = deptName ? stores[storeName].departments.find(d => d.name === deptName) : null;
+
+            if (product && dept) {
                 selectedStore = storeName;
-                const dept = defaultStores[storeName].departments.find(d => d.name === deptName);
-                shoppingLists[selectedList].items.push({
-                    name: product,
-                    dept: dept ? { name: dept.name, order: dept.order } : null,
-                    isCustom: false,
-                    quantity: 1,
-                    comment: '',
-                    completed: false
-                });
-                saveShoppingLists();
+                stores[storeName].shoppingList.push({ name: product, dept, isCustom: false, quantity: 1, comment: '' });
+                saveStores();
                 document.getElementById('productSelect').value = '';
                 updateShoppingList();
             }
@@ -701,23 +658,20 @@
             const storeName = document.getElementById('storeSelect').value;
             const customProduct = document.getElementById('customProduct').value;
 
-            if (!storeName || !selectedList) {
-                alert('Выберите магазин и список!');
+            if (!storeName) {
+                alert('Выберите магазин!');
                 return;
             }
 
             if (customProduct) {
                 selectedStore = storeName;
                 const existingDept = findDepartment(customProduct);
-                shoppingLists[selectedList].items.push({
-                    name: customProduct,
-                    dept: existingDept ? { name: existingDept.name, order: existingDept.order } : null,
-                    isCustom: !existingDept,
-                    quantity: 1,
-                    comment: '',
-                    completed: false
-                });
-                saveShoppingLists();
+                if (existingDept) {
+                    stores[storeName].shoppingList.push({ name: customProduct, dept: existingDept, isCustom: false, quantity: 1, comment: '' });
+                } else {
+                    stores[storeName].shoppingList.push({ name: customProduct, dept: null, isCustom: true, quantity: 1, comment: '' });
+                }
+                saveStores();
                 document.getElementById('customProduct').value = '';
                 document.getElementById('suggestions').innerHTML = '';
                 updateShoppingList();
@@ -725,25 +679,24 @@
         }
 
         function saveAndSort() {
-            if (!selectedList || !selectedStore) {
-                alert('Выберите список и магазин!');
-                return;
+            if (selectedStore && stores[selectedStore]) {
+                stores[selectedStore].shoppingList.sort((a, b) => {
+                    if (a.isCustom && !b.isCustom) return 1;
+                    if (!a.isCustom && b.isCustom) return -1;
+                    return a.dept.order - b.dept.order;
+                });
+                saveStores();
+                updateShoppingList();
             }
-            shoppingLists[selectedList].items.sort((a, b) => {
-                if (a.isCustom && !b.isCustom) return 1;
-                if (!a.isCustom && b.isCustom) return -1;
-                return (a.dept ? a.dept.order : Infinity) - (b.dept ? b.dept.order : Infinity);
-            });
-            saveShoppingLists();
-            updateShoppingList();
         }
 
         function updateShoppingList() {
+            const storeName = document.getElementById('storeSelect').value || document.getElementById('storeSelectForLoad').value;
             const list = document.getElementById('shoppingList');
             list.innerHTML = '';
-            if (selectedList && shoppingLists[selectedList]) {
-                selectedStore = shoppingLists[selectedList].store;
-                shoppingLists[selectedList].items.forEach((item, index) => {
+            if (storeName && stores[storeName]) {
+                selectedStore = storeName;
+                stores[selectedStore].shoppingList.forEach((item, index) => {
                     const li = document.createElement('li');
                     li.innerHTML = `
                         <span>${item.dept ? `${item.name} (${item.dept.name})` : item.name}</span>
@@ -756,9 +709,9 @@
                     `;
                     li.onclick = (e) => {
                         if (e.target.tagName !== 'BUTTON' && e.target.tagName !== 'INPUT') {
-                            item.completed = !item.completed;
-                            li.classList.toggle('completed', item.completed);
-                            saveShoppingLists();
+                            li.classList.toggle('completed');
+                            item.completed = li.classList.contains('completed');
+                            saveStores();
                         }
                     };
                     if (item.completed) li.classList.add('completed');
@@ -768,50 +721,98 @@
         }
 
         function changeQuantity(index, delta) {
-            if (selectedList && shoppingLists[selectedList]) {
-                shoppingLists[selectedList].items[index].quantity = Math.max(1, shoppingLists[selectedList].items[index].quantity + delta);
-                saveShoppingLists();
+            if (selectedStore && stores[selectedStore]) {
+                stores[selectedStore].shoppingList[index].quantity = Math.max(1, stores[selectedStore].shoppingList[index].quantity + delta);
+                saveStores();
                 updateShoppingList();
             }
         }
 
         function updateQuantity(index, value) {
-            if (selectedList && shoppingLists[selectedList]) {
-                shoppingLists[selectedList].items[index].quantity = Math.max(1, parseInt(value) || 1);
-                saveShoppingLists();
+            if (selectedStore && stores[selectedStore]) {
+                const newValue = parseInt(value) || 1;
+                stores[selectedStore].shoppingList[index].quantity = Math.max(1, newValue);
+                saveStores();
                 updateShoppingList();
             }
         }
 
         function updateComment(index, value) {
-            if (selectedList && shoppingLists[selectedList]) {
-                shoppingLists[selectedList].items[index].comment = value;
-                saveShoppingLists();
+            if (selectedStore && stores[selectedStore]) {
+                stores[selectedStore].shoppingList[index].comment = value;
+                saveStores();
             }
         }
 
         function downloadList() {
-            if (selectedList && shoppingLists[selectedList]) {
-                const json = JSON.stringify(shoppingLists[selectedList].items, null, 2);
+            if (selectedStore && stores[selectedStore]) {
+                const json = JSON.stringify(stores[selectedStore].shoppingList, null, 2);
                 const blob = new Blob([json], { type: 'application/json' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `${selectedList}_${shoppingLists[selectedList].store}.json`;
+                a.download = `${selectedStore}_shopping_list.json`;
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
             } else {
-                alert('Выберите список для скачивания!');
+                alert('Выберите магазин для скачивания списка!');
+            }
+        }
+
+        function loadListFromFile() {
+            const storeName = document.getElementById('storeSelectForLoad').value;
+            if (!storeName) {
+                alert('Выберите магазин!');
+                return;
+            }
+
+            const fileInput = document.getElementById('loadFile');
+            const file = fileInput.files[0];
+            if (file && storeName) {
+                selectedStore = storeName;
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    try {
+                        const loadedList = JSON.parse(event.target.result);
+                        if (Array.isArray(loadedList)) {
+                            stores[selectedStore].shoppingList = loadedList.map(item => ({
+                                name: item.name,
+                                dept: item.dept ? stores[selectedStore].departments.find(d => d.name === item.dept.name) || null : null,
+                                isCustom: item.isCustom || false,
+                                quantity: item.quantity || 1,
+                                comment: item.comment || '',
+                                completed: item.completed || false
+                            }));
+                            saveStores();
+                            updateShoppingList();
+                            alert('Список успешно загружен!');
+                        } else {
+                            alert('Неверный формат файла!');
+                        }
+                    } catch (e) {
+                        alert('Ошибка при загрузке файла: ' + e.message);
+                    }
+                };
+                reader.readAsText(file);
             }
         }
 
         // Инициализация
-        initTheme();
+        document.getElementById('deptSelectForProducts').onchange = updateProductList;
         document.getElementById('deptSelect').onchange = updateProductSelect;
-        loadUsers();
         updateAuthState();
     </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
