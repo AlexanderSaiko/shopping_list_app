@@ -115,7 +115,7 @@
             color: var(--text);
         }
 
-        select, input[type="text"], input[type="number"], input[type="file"], input[type="password"] {
+        select, input[type="text"], input[type="number"], input[type="password"] {
             width: 100%;
             padding: 12px;
             margin: 8px 0;
@@ -289,7 +289,7 @@
                 font-size: 20px;
             }
 
-            select, input[type="text"], input[type="number"], input[type="file"], input[type="password"] {
+            select, input[type="text"], input[type="number"], input[type="password"] {
                 max-width: 100%;
             }
 
@@ -337,7 +337,6 @@
         <nav>
             <button onclick="showTab('auth')" id="authTabBtn">Войти</button>
             <button onclick="showTab('shopping')" id="shoppingTabBtn" style="display: none;">Списки</button>
-            <button onclick="showTab('loadList')" id="loadListTabBtn" style="display: none;">Загрузить</button>
             <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
             <span class="auth-info" id="authInfo"></span>
         </nav>
@@ -371,13 +370,6 @@
             <button class="secondary" onclick="saveAndSort()">Сортировать</button>
             <button class="secondary" onclick="downloadList()">Скачать (JSON)</button>
             <ul id="shoppingList"></ul>
-        </div>
-
-        <div id="loadList" class="tab">
-            <h2>Загрузить список</h2>
-            <select id="storeSelectForLoad" onchange="updateShoppingList()"></select>
-            <input type="file" id="loadFile" accept=".json" onchange="loadListFromFile()">
-            <p>Выберите JSON-файл со списком покупок для загрузки.</p>
         </div>
     </div>
 
@@ -449,22 +441,17 @@
                 updateListSelect();
                 updateStoreSelect('storeSelect');
             }
-            if (currentUser && tabId === 'loadList') {
-                updateStoreSelect('storeSelectForLoad');
-            }
         }
 
         function updateAuthState() {
             const authTabBtn = document.getElementById('authTabBtn');
             const shoppingTabBtn = document.getElementById('shoppingTabBtn');
-            const loadListTabBtn = document.getElementById('loadListTabBtn');
             const logoutBtn = document.getElementById('logoutBtn');
             const authInfo = document.getElementById('authInfo');
 
             if (currentUser) {
                 authTabBtn.style.display = 'none';
                 shoppingTabBtn.style.display = 'inline';
-                loadListTabBtn.style.display = 'inline';
                 logoutBtn.style.display = 'inline';
                 authInfo.textContent = `Привет, ${currentUser}!`;
                 loadShoppingLists();
@@ -472,7 +459,6 @@
             } else {
                 authTabBtn.style.display = 'inline';
                 shoppingTabBtn.style.display = 'none';
-                loadListTabBtn.style.display = 'none';
                 logoutBtn.style.display = 'none';
                 authInfo.textContent = '';
                 showTab('auth');
@@ -821,55 +807,6 @@
             }
         }
 
-        function loadListFromFile() {
-            const storeName = document.getElementById('storeSelectForLoad').value;
-            if (!storeName) {
-                alert('Выберите магазин!');
-                return;
-            }
-
-            const fileInput = document.getElementById('loadFile');
-            const file = fileInput.files[0];
-            if (file) {
-                selectedStore = storeName;
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    try {
-                        const loadedList = JSON.parse(event.target.result);
-                        if (Array.isArray(loadedList)) {
-                            let listName = prompt('Введите название для загружаемого списка:', `Список ${Object.keys(shoppingLists).length + 1}`);
-                            if (!listName) return;
-                            if (shoppingLists[listName]) {
-                                alert('Список с таким названием уже существует!');
-                                return;
-                            }
-                            shoppingLists[listName] = {
-                                store: storeName,
-                                items: loadedList.map(item => ({
-                                    name: item.name,
-                                    dept: defaultStores[storeName].departments.find(d => d.name === (item.dept?.name || '')) || null,
-                                    isCustom: item.isCustom || false,
-                                    quantity: item.quantity || 1,
-                                    comment: item.comment || '',
-                                    completed: item.completed || false
-                                }))
-                            };
-                            selectedList = listName;
-                            saveShoppingLists();
-                            updateListSelect();
-                            updateShoppingList();
-                            alert('Список успешно загружен!');
-                        } else {
-                            alert('Неверный формат файла!');
-                        }
-                    } catch (e) {
-                        alert('Ошибка при загрузке файла: ' + e.message);
-                    }
-                };
-                reader.readAsText(file);
-            }
-        }
-
         // Инициализация
         initTheme();
         document.getElementById('deptSelect').onchange = updateProductSelect;
@@ -878,4 +815,3 @@
     </script>
 </body>
 </html>
-
