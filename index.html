@@ -42,6 +42,7 @@
             background: var(--background);
             color: var(--text);
             transition: all 0.3s ease;
+            overflow-x: hidden;
         }
 
         header {
@@ -76,6 +77,7 @@
             padding: 8px 12px;
             cursor: pointer;
             transition: color 0.3s ease;
+            min-height: 44px;
         }
 
         nav button.active, nav button:hover {
@@ -88,10 +90,11 @@
             font-size: 20px;
             cursor: pointer;
             color: var(--secondary-text);
+            min-height: 44px;
         }
 
         .container {
-            max-width: 600px;
+            max-width: 1200px;
             margin: 16px auto;
             padding: 0 16px;
         }
@@ -117,7 +120,7 @@
             color: var(--text);
         }
 
-        select, input[type="text"], input[type="number"], input[type="file"], input[type="password"] {
+        select, input[type="text"], input[type="number"], input[type="password"] {
             width: 100%;
             padding: 12px;
             margin: 8px 0;
@@ -128,6 +131,7 @@
             color: var(--text);
             appearance: none;
             transition: border-color 0.3s ease;
+            min-height: 44px;
         }
 
         select:focus, input:focus {
@@ -147,6 +151,8 @@
             transition: background 0.3s ease;
             margin: 8px 4px;
             display: inline-block;
+            min-height: 44px;
+            min-width: 44px;
         }
 
         button:hover {
@@ -202,6 +208,7 @@
             font-size: 14px;
             margin: 0;
             border: 1px solid var(--border);
+            min-height: 44px;
         }
 
         .quantity-controls input {
@@ -209,11 +216,13 @@
             max-width: 50px;
             text-align: center;
             margin: 0;
+            min-height: 44px;
         }
 
         .comment-input, .price-input {
             flex-grow: 1;
             max-width: 200px;
+            min-height: 44px;
         }
 
         #suggestions {
@@ -233,6 +242,7 @@
             padding: 12px;
             cursor: pointer;
             color: var(--text);
+            min-height: 44px;
         }
 
         #suggestions div:hover {
@@ -259,6 +269,7 @@
         .list-controls button {
             padding: 8px 12px;
             font-size: 14px;
+            min-height: 44px;
         }
 
         .edit-delete-controls {
@@ -270,6 +281,7 @@
         .edit-delete-controls button {
             padding: 8px;
             font-size: 14px;
+            min-height: 44px;
         }
 
         .total-sum {
@@ -280,7 +292,47 @@
             text-align: right;
         }
 
+        .lists-tab-content {
+            display: flex;
+            gap: 16px;
+        }
+
+        .lists-main {
+            flex: 1;
+            max-width: 600px;
+        }
+
+        #selectedItemsColumn {
+            width: 300px;
+            background: var(--card-background);
+            border-left: 1px solid var(--border);
+            padding: 16px;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            display: none;
+        }
+
+        #selectedItemsColumn.active {
+            display: block;
+        }
+
+        #selectedItemsColumn h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text);
+        }
+
+        #toggleSelectedItems {
+            display: none;
+            margin: 8px 0;
+        }
+
         @media (max-width: 430px) {
+            body {
+                font-size: 16px;
+            }
+
             header {
                 flex-direction: column;
                 padding: 8px;
@@ -300,6 +352,7 @@
             nav button {
                 font-size: 14px;
                 padding: 6px 8px;
+                min-height: 44px;
             }
 
             .container {
@@ -311,13 +364,16 @@
                 font-size: 20px;
             }
 
-            select, input[type="text"], input[type="number"], input[type="file"], input[type="password"] {
+            select, input[type="text"], input[type="number"], input[type="password"] {
                 max-width: 100%;
+                min-height: 44px;
+                font-size: 16px;
             }
 
             button {
                 width: 100%;
                 padding: 12px;
+                min-height: 44px;
             }
 
             ul li {
@@ -330,8 +386,13 @@
                 justify-content: space-between;
             }
 
+            .quantity-controls button {
+                min-height: 44px;
+            }
+
             .comment-input, .price-input {
                 max-width: 100%;
+                min-height: 44px;
             }
 
             #suggestions {
@@ -353,6 +414,26 @@
 
             .total-sum {
                 text-align: left;
+            }
+
+            .lists-tab-content {
+                flex-direction: column;
+            }
+
+            #selectedItemsColumn {
+                width: 100%;
+                border-left: none;
+                border-top: 1px solid var(--border);
+                display: none;
+            }
+
+            #selectedItemsColumn.active {
+                display: block;
+            }
+
+            #toggleSelectedItems {
+                display: block;
+                width: auto;
             }
         }
     </style>
@@ -386,31 +467,40 @@
 
         <div id="listsTab" class="tab">
             <h2>Списки покупок</h2>
-            <div class="list-controls">
-                <select id="listSelect">
-                    <option value="">Выберите список</option>
-                </select>
-                <button class="secondary" id="newListBtn">Новый список</button>
-                <button class="secondary" id="downloadListBtn">Скачать список</button>
-                <button class="secondary" id="loadListBtn">Загрузить список</button>
-                <input type="file" id="loadFile" style="display: none;" accept=".json">
+            <div class="lists-tab-content">
+                <div class="lists-main">
+                    <div class="list-controls">
+                        <select id="listSelect">
+                            <option value="">Выберите список</option>
+                        </select>
+                        <button class="secondary" id="newListBtn">Новый список</button>
+                        <button class="secondary" id="downloadListBtn">Скачать список</button>
+                        <button class="secondary" id="loadListBtn">Загрузить список</button>
+                        <input type="file" id="loadFile" style="display: none;" accept=".json">
+                    </div>
+                    <ul id="listManagement"></ul>
+                    <select id="storeSelect">
+                        <option value="">Выберите магазин</option>
+                    </select>
+                    <select id="deptSelect">
+                        <option value="">Выберите отдел</option>
+                    </select>
+                    <select id="productSelect">
+                        <option value="">Выберите продукт</option>
+                    </select>
+                    <button id="addItemFromSelectBtn">Добавить</button>
+                    <input type="text" id="customProduct" placeholder="Или введите свой продукт">
+                    <div id="suggestions"></div>
+                    <button id="addItemFromInputBtn">Добавить свой</button>
+                    <button id="saveAndSortBtn">Сохранить и отсортировать</button>
+                    <button id="toggleSelectedItems" class="secondary">Показать выбранные позиции</button>
+                    <ul id="shoppingList"></ul>
+                </div>
+                <div id="selectedItemsColumn">
+                    <h3>Выбранные позиции</h3>
+                    <ul id="selectedItemsList"></ul>
+                </div>
             </div>
-            <ul id="listManagement"></ul>
-            <select id="storeSelect">
-                <option value="">Выберите магазин</option>
-            </select>
-            <select id="deptSelect">
-                <option value="">Выберите отдел</option>
-            </select>
-            <select id="productSelect">
-                <option value="">Выберите продукт</option>
-            </select>
-            <button id="addItemFromSelectBtn">Добавить</button>
-            <input type="text" id="customProduct" placeholder="Или введите свой продукт">
-            <div id="suggestions"></div>
-            <button id="addItemFromInputBtn">Добавить свой</button>
-            <button id="saveAndSortBtn">Сохранить и отсортировать</button>
-            <ul id="shoppingList"></ul>
         </div>
 
         <div id="productsTab" class="tab">
@@ -504,6 +594,7 @@
                 updateProductList();
             } else if (tabId === 'listsTab') {
                 updateListManagement();
+                updateSelectedItemsColumn();
             } else if (tabId === 'archiveTab') {
                 updateArchiveList();
             }
@@ -515,7 +606,6 @@
                 const storedUsers = localStorage.getItem('users');
                 if (storedUsers) {
                     users = JSON.parse(storedUsers) || {};
-                    // Backward compatibility
                     Object.values(users).forEach(user => {
                         if (!user.archive) user.archive = {};
                         Object.values(user.stores || {}).forEach(store => {
@@ -525,7 +615,6 @@
                                 }
                             });
                         });
-                        // Remove image fields from existing lists
                         Object.values(user.lists || {}).forEach(list => {
                             list.items.forEach(item => {
                                 if (item.image) delete item.image;
@@ -628,6 +717,7 @@
             updateProductList();
             updateListManagement();
             updateArchiveList();
+            updateSelectedItemsColumn();
         }
 
         function updateAuthState() {
@@ -697,6 +787,8 @@
                 saveShoppingLists();
                 updateListSelect();
                 updateListManagement();
+                updateShoppingList();
+                updateSelectedItemsColumn();
             } else if (shoppingLists[newName]) {
                 alert('Список с таким названием уже существует!');
             }
@@ -714,6 +806,7 @@
                 updateListSelect();
                 updateListManagement();
                 updateShoppingList();
+                updateSelectedItemsColumn();
             }
         }
 
@@ -734,6 +827,7 @@
             updateListManagement();
             updateShoppingList();
             updateArchiveList();
+            updateSelectedItemsColumn();
         }
 
         function updateArchiveList() {
@@ -850,6 +944,7 @@
                 updateListSelect();
                 updateListManagement();
                 updateShoppingList();
+                updateSelectedItemsColumn();
             } else if (shoppingLists[listName]) {
                 alert('Список с таким названием уже существует!');
             }
@@ -960,7 +1055,7 @@
                 saveShoppingLists();
                 updateDeptList();
             } else if (defaultStores[storeName].departments.find(d => d.name === newDeptName)) {
-                alert('Отдел с таким названием уже существует!');
+                    alert('Отдел с таким названием уже существует!');
             }
         }
 
@@ -1266,6 +1361,7 @@
                 saveShoppingLists();
                 productSelect.value = '';
                 updateShoppingList();
+                updateSelectedItemsColumn();
             } else {
                 alert('Выберите отдел и продукт!');
             }
@@ -1304,6 +1400,7 @@
                 customProductInput.value = '';
                 document.getElementById('suggestions').innerHTML = '';
                 updateShoppingList();
+                updateSelectedItemsColumn();
             } else {
                 alert('Введите название продукта!');
             }
@@ -1321,6 +1418,7 @@
             });
             saveShoppingLists();
             updateShoppingList();
+            updateSelectedItemsColumn();
         }
 
         function calculateTotalSum(listName) {
@@ -1372,6 +1470,7 @@
                             saveShoppingLists();
                             totalSum.textContent = `Итого: ${calculateTotalSum(selectedListForShop)}`;
                             checkAndScheduleArchive(selectedListForShop);
+                            updateSelectedItemsColumn();
                         }
                     };
                     if (item.completed) li.classList.add('completed');
@@ -1384,11 +1483,58 @@
             }
         }
 
+        function updateSelectedItemsColumn() {
+            const column = document.getElementById('selectedItemsColumn');
+            const list = document.getElementById('selectedItemsList');
+            if (!column || !list) return;
+
+            list.innerHTML = '';
+            if (selectedList && shoppingLists[selectedList]) {
+                column.classList.add('active');
+                shoppingLists[selectedList].items.forEach((item, index) => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `
+                        <span>${item.dept ? `${item.name} (${item.dept.name})` : item.name}</span>
+                        <div class="quantity-controls">
+                            <button onclick="changeQuantity('${selectedList}', ${index}, -1)">−</button>
+                            <input type="number" min="1" value="${item.quantity}" onchange="updateQuantity('${selectedList}', ${index}, this.value)">
+                            <button onclick="changeQuantity('${selectedList}', ${index}, 1)">+</button>
+                        </div>
+                        <input type="text" class="comment-input" placeholder="Комментарий" value="${item.comment || ''}" oninput="updateComment('${selectedList}', ${index}, this.value)">
+                        <input type="number" class="price-input" placeholder="Цена" step="0.01" min="0" value="${item.price > 0 ? item.price : ''}" oninput="updatePrice('${selectedList}', ${index}, this.value)">
+                    `;
+                    li.onclick = (e) => {
+                        if (e.target.tagName !== 'BUTTON' && e.target.tagName !== 'INPUT') {
+                            item.completed = !item.completed;
+                            li.classList.toggle('completed', item.completed);
+                            saveShoppingLists();
+                            updateShoppingList();
+                            checkAndScheduleArchive(selectedList);
+                        }
+                    };
+                    if (item.completed) li.classList.add('completed');
+                    list.appendChild(li);
+                });
+            } else {
+                column.classList.remove('active');
+            }
+        }
+
+        function toggleSelectedItemsColumn() {
+            const column = document.getElementById('selectedItemsColumn');
+            const toggleBtn = document.getElementById('toggleSelectedItems');
+            if (column && toggleBtn) {
+                column.classList.toggle('active');
+                toggleBtn.textContent = column.classList.contains('active') ? 'Скрыть выбранные позиции' : 'Показать выбранные позиции';
+            }
+        }
+
         function changeQuantity(listName, index, delta) {
             if (listName && shoppingLists[listName]) {
                 shoppingLists[listName].items[index].quantity = Math.max(1, shoppingLists[listName].items[index].quantity + delta);
                 saveShoppingLists();
                 updateShoppingList();
+                updateSelectedItemsColumn();
             }
         }
 
@@ -1397,6 +1543,7 @@
                 shoppingLists[listName].items[index].quantity = Math.max(1, parseInt(value) || 1);
                 saveShoppingLists();
                 updateShoppingList();
+                updateSelectedItemsColumn();
             }
         }
 
@@ -1404,6 +1551,8 @@
             if (listName && shoppingLists[listName]) {
                 shoppingLists[listName].items[index].comment = value;
                 saveShoppingLists();
+                updateShoppingList();
+                updateSelectedItemsColumn();
             }
         }
 
@@ -1411,6 +1560,8 @@
             if (listName && shoppingLists[listName]) {
                 shoppingLists[listName].items[index].price = parseFloat(value) || 0;
                 saveShoppingLists();
+                updateShoppingList();
+                updateSelectedItemsColumn();
                 const totalSum = document.getElementById('totalSum');
                 if (totalSum) {
                     totalSum.textContent = `Итого: ${calculateTotalSum(listName)}`;
@@ -1477,6 +1628,7 @@
                             updateListSelect();
                             updateListManagement();
                             updateShoppingList();
+                            updateSelectedItemsColumn();
                             alert('Список успешно загружен!');
                         } else {
                             alert('Неверный формат файла!');
@@ -1496,7 +1648,6 @@
             loadUsers();
             updateAuthState();
 
-            // Event listeners for navigation buttons
             const shopTabBtn = document.getElementById('shopTabBtn');
             const listsTabBtn = document.getElementById('listsTabBtn');
             const productsTabBtn = document.getElementById('productsTabBtn');
@@ -1575,7 +1726,6 @@
                 console.warn('Theme toggle button not found');
             }
 
-            // Other event listeners
             const listSelectForShop = document.getElementById('listSelectForShop');
             const listSelect = document.getElementById('listSelect');
             const storeSelect = document.getElementById('storeSelect');
@@ -1596,9 +1746,10 @@
             const logoutBtn = document.getElementById('logoutBtn');
             const customProductInput = document.getElementById('customProduct');
             const loadFileInput = document.getElementById('loadFile');
+            const toggleSelectedItemsBtn = document.getElementById('toggleSelectedItems');
 
             if (listSelectForShop) listSelectForShop.onchange = updateShoppingList;
-            if (listSelect) listSelect.onchange = () => { selectedList = listSelect.value; updateShoppingList(); };
+            if (listSelect) listSelect.onchange = () => { selectedList = listSelect.value; updateShoppingList(); updateSelectedItemsColumn(); };
             if (storeSelect) storeSelect.onchange = updateDeptSelect;
             if (deptSelect) deptSelect.onchange = updateProductSelect;
             if (storeSelectForProducts) storeSelectForProducts.onchange = updateDeptSelectForProducts;
@@ -1620,6 +1771,7 @@
                 customProductInput.onkeydown = handleKey;
             }
             if (loadFileInput) loadFileInput.onchange = loadListFromFile;
+            if (toggleSelectedItemsBtn) toggleSelectedItemsBtn.onclick = toggleSelectedItemsColumn;
 
             console.log('Initialization complete');
         });
