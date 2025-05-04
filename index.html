@@ -216,12 +216,6 @@
             max-width: 200px;
         }
 
-        .image-icon {
-            cursor: pointer;
-            font-size: 18px;
-            margin-left: 8px;
-        }
-
         #suggestions {
             position: absolute;
             background: var(--card-background);
@@ -284,35 +278,6 @@
             margin-top: 16px;
             color: var(--text);
             text-align: right;
-        }
-
-        .image-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .image-modal img {
-            max-width: 90%;
-            max-height: 90%;
-            border-radius: 10px;
-            box-shadow: var(--shadow);
-        }
-
-        .image-modal button {
-            position: absolute;
-            top: 16px;
-            right: 16px;
-            background: var(--card-background);
-            color: var(--accent);
-            padding: 8px 12px;
         }
 
         @media (max-width: 430px) {
@@ -389,11 +354,6 @@
             .total-sum {
                 text-align: left;
             }
-
-            .image-modal img {
-                max-width: 95%;
-                max-height: 80%;
-            }
         }
     </style>
 </head>
@@ -446,9 +406,7 @@
                 <option value="">Выберите продукт</option>
             </select>
             <button id="addItemFromSelectBtn">Добавить</button>
-            <input type="file" id="productImageSelect" accept="image/*" style="display: none;">
             <input type="text" id="customProduct" placeholder="Или введите свой продукт">
-            <input type="file" id="customProductImage" accept="image/*">
             <div id="suggestions"></div>
             <button id="addItemFromInputBtn">Добавить свой</button>
             <button id="saveAndSortBtn">Сохранить и отсортировать</button>
@@ -502,11 +460,6 @@
             <button class="secondary" id="registerBtn">Регистрация</button>
             <button class="secondary" id="logoutBtn">Выйти</button>
         </div>
-    </div>
-
-    <div id="imageModal" class="image-modal">
-        <img id="modalImage" src="">
-        <button onclick="closeImageModal()">Закрыть</button>
     </div>
 
     <script>
@@ -572,9 +525,15 @@
                                 }
                             });
                         });
+                        // Remove image fields from existing lists
                         Object.values(user.lists || {}).forEach(list => {
                             list.items.forEach(item => {
-                                if (!item.image) item.image = '';
+                                if (item.image) delete item.image;
+                            });
+                        });
+                        Object.values(user.archive || {}).forEach(list => {
+                            list.items.forEach(item => {
+                                if (item.image) delete item.image;
                             });
                         });
                     });
@@ -791,7 +750,6 @@
                         <li class="completed">
                             ${item.dept ? `${item.name} (${item.dept.name})` : item.name}
                             (Кол-во: ${item.quantity}, Цена: ${item.price > 0 ? item.price : '-'}, Коммент: ${item.comment || '-'})
-                            ${item.image ? '<span class="image-icon" onclick="showImageModal(\'' + item.image + '\')">📷</span>' : ''}
                         </li>
                     `;
                 });
@@ -908,7 +866,7 @@
                 updateStoreSelect();
                 updateStoreList();
                 storeNameInput.value = '';
-            } else if (defaultStores[name]) {
+            } else if (defaultStores[storeName]) {
                 alert('Магазин с таким названием уже существует!');
             }
         }
@@ -1256,120 +1214,98 @@
             return null;
         }
 
+        function ensureSelectedList() {
+            if (!selectedList || !shoppingLists[selectedList]) {
+                const listNames = Object.keys(shoppingLists);
+                if (listNames.length > 0) {
+                    selectedList = listNames[0];
+                } else {
+                    let newListName = `Список ${listNames.length + 1}`;
+                    shoppingLists[newListName] = { store: '', items: [] };
+                    selectedList = newListName;
+                    saveShoppingLists();
+                    updateListSelect();
+                    updateListManagement();
+                }
+            }
+            return selectedList;
+        }
+
         function addItemFromSelect() {
             const storeSelect = document.getElementById('storeSelect');
             const deptSelect = document.getElementById('deptSelect');
             const productSelect = document.getElementById('productSelect');
-            const productImageSelect = document.getElementById('productImageSelect');
-            if (!storeSelect || !deptSelect || !productSelect || !productImageSelect) return;
+            if (!storeSelect || !deptSelect || !productSelect) return;
 
             const storeName = storeSelect.value;
             const deptName = deptSelect.value;
             const productName = productSelect.value;
 
-            if (!storeName || !selectedList) {
-                alert('Выберите магазин и список!');
+            console.log('Adding item from select:', { storeName, deptName, productName, selectedList });
+
+            if (!storeName) {
+                alert('Выберите магазин!');
                 return;
             }
 
             if (productName && deptName) {
                 selectedStore = storeName;
+                ensureSelectedList();
+                shoppingLists[selectedList].store = storeName;
                 const dept = defaultStores[storeName].departments.find(d => d.name === deptName);
                 const product = dept.products.find(p => p.name === productName);
-                const file = productImageSelect.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        shoppingLists[selectedList].items.push({
-                            name: productName,
-                            dept: dept ? { name: dept.name, order: dept.order } : null,
-                            isCustom: false,
-                            quantity: product.quantity,
-                            comment: product.comment || '',
-                            price: 0,
-                            image: e.target.result,
-                            completed: false
-                        });
-                        saveShoppingLists();
-                        productSelect.value = '';
-                        productImageSelect.value = '';
-                        updateShoppingList();
-                    };
-                    reader.readAsDataURL(file);
-                } else {
-                    shoppingLists[selectedList].items.push({
-                        name: productName,
-                        dept: dept ? { name: dept.name, order: dept.order } : null,
-                        isCustom: false,
-                        quantity: product.quantity,
-                        comment: product.comment || '',
-                        price: 0,
-                        image: '',
-                        completed: false
-                    });
-                    saveShoppingLists();
-                    productSelect.value = '';
-                    productImageSelect.value = '';
-                    updateShoppingList();
-                }
+                shoppingLists[selectedList].items.push({
+                    name: productName,
+                    dept: dept ? { name: dept.name, order: dept.order } : null,
+                    isCustom: false,
+                    quantity: product.quantity,
+                    comment: product.comment || '',
+                    price: 0,
+                    completed: false
+                });
+                saveShoppingLists();
+                productSelect.value = '';
+                updateShoppingList();
+            } else {
+                alert('Выберите отдел и продукт!');
             }
         }
 
         function addItemFromInput() {
             const storeSelect = document.getElementById('storeSelect');
             const customProductInput = document.getElementById('customProduct');
-            const customProductImage = document.getElementById('customProductImage');
-            if (!storeSelect || !customProductInput || !customProductImage) return;
+            if (!storeSelect || !customProductInput) return;
 
             const storeName = storeSelect.value;
             const customProduct = customProductInput.value;
 
-            if (!storeName || !selectedList) {
-                alert('Выберите магазин и список!');
+            console.log('Adding item from input:', { storeName, customProduct, selectedList });
+
+            if (!storeName) {
+                alert('Выберите магазин!');
                 return;
             }
 
             if (customProduct) {
                 selectedStore = storeName;
+                ensureSelectedList();
+                shoppingLists[selectedList].store = storeName;
                 const existingDept = findDepartment(customProduct);
-                const file = customProductImage.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        shoppingLists[selectedList].items.push({
-                            name: customProduct,
-                            dept: existingDept ? { name: existingDept.name, order: existingDept.order } : null,
-                            isCustom: !existingDept,
-                            quantity: 1,
-                            comment: '',
-                            price: 0,
-                            image: e.target.result,
-                            completed: false
-                        });
-                        saveShoppingLists();
-                        customProductInput.value = '';
-                        customProductImage.value = '';
-                        document.getElementById('suggestions').innerHTML = '';
-                        updateShoppingList();
-                    };
-                    reader.readAsDataURL(file);
-                } else {
-                    shoppingLists[selectedList].items.push({
-                        name: customProduct,
-                        dept: existingDept ? { name: existingDept.name, order: existingDept.order } : null,
-                        isCustom: !existingDept,
-                        quantity: 1,
-                        comment: '',
-                        price: 0,
-                        image: '',
-                        completed: false
-                    });
-                    saveShoppingLists();
-                    customProductInput.value = '';
-                    customProductImage.value = '';
-                    document.getElementById('suggestions').innerHTML = '';
-                    updateShoppingList();
-                }
+                shoppingLists[selectedList].items.push({
+                    name: customProduct,
+                    dept: existingDept ? { name: existingDept.name, order: existingDept.order } : null,
+                    isCustom: !existingDept,
+                    quantity: 1,
+                    comment: '',
+                    price: 0,
+                    completed: false
+                });
+                saveShoppingLists();
+                customProductInput.value = '';
+                document.getElementById('suggestions').innerHTML = '';
+                updateShoppingList();
+            } else {
+                alert('Введите название продукта!');
             }
         }
 
@@ -1428,10 +1364,9 @@
                         </div>
                         <input type="text" class="comment-input" placeholder="Комментарий" value="${item.comment || ''}" oninput="updateComment('${selectedListForShop}', ${index}, this.value)">
                         <input type="number" class="price-input" placeholder="Цена" step="0.01" min="0" value="${item.price > 0 ? item.price : ''}" oninput="updatePrice('${selectedListForShop}', ${index}, this.value)">
-                        ${item.image ? `<span class="image-icon" onclick="showImageModal('${item.image}')">📷</span>` : ''}
                     `;
                     li.onclick = (e) => {
-                        if (e.target.tagName !== 'BUTTON' && e.target.tagName !== 'INPUT' && e.target.className !== 'image-icon') {
+                        if (e.target.tagName !== 'BUTTON' && e.target.tagName !== 'INPUT') {
                             item.completed = !item.completed;
                             li.classList.toggle('completed', item.completed);
                             saveShoppingLists();
@@ -1480,22 +1415,6 @@
                 if (totalSum) {
                     totalSum.textContent = `Итого: ${calculateTotalSum(listName)}`;
                 }
-            }
-        }
-
-        function showImageModal(imageData) {
-            const modal = document.getElementById('imageModal');
-            const modalImage = document.getElementById('modalImage');
-            if (modal && modalImage) {
-                modalImage.src = imageData;
-                modal.style.display = 'flex';
-            }
-        }
-
-        function closeImageModal() {
-            const modal = document.getElementById('imageModal');
-            if (modal) {
-                modal.style.display = 'none';
             }
         }
 
@@ -1550,7 +1469,6 @@
                                     quantity: item.quantity || 1,
                                     comment: item.comment || '',
                                     price: item.price || 0,
-                                    image: item.image || '',
                                     completed: item.completed || false
                                 }))
                             };
@@ -1678,8 +1596,6 @@
             const logoutBtn = document.getElementById('logoutBtn');
             const customProductInput = document.getElementById('customProduct');
             const loadFileInput = document.getElementById('loadFile');
-            const productSelect = document.getElementById('productSelect');
-            const productImageSelect = document.getElementById('productImageSelect');
 
             if (listSelectForShop) listSelectForShop.onchange = updateShoppingList;
             if (listSelect) listSelect.onchange = () => { selectedList = listSelect.value; updateShoppingList(); };
@@ -1690,12 +1606,7 @@
             if (newListBtn) newListBtn.onclick = createNewList;
             if (downloadListBtn) downloadListBtn.onclick = downloadList;
             if (loadListBtn) loadListBtn.onclick = () => loadFileInput?.click();
-            if (addItemFromSelectBtn) addItemFromSelectBtn.onclick = () => {
-                if (productSelect.value) {
-                    productImageSelect.click();
-                    productImageSelect.onchange = addItemFromSelect;
-                }
-            };
+            if (addItemFromSelectBtn) addItemFromSelectBtn.onclick = addItemFromSelect;
             if (addItemFromInputBtn) addItemFromInputBtn.onclick = addItemFromInput;
             if (saveAndSortBtn) saveAndSortBtn.onclick = saveAndSort;
             if (addStoreBtn) addStoreBtn.onclick = addStore;
