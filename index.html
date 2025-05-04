@@ -669,43 +669,53 @@
             console.log(`Tab switched to: ${tabId}`);
         }
 
-        function loadUsers() {
+        async function loadUsers() {
             try {
-                const storedUsers = localStorage.getItem('users');
-                if (storedUsers) {
-                    users = JSON.parse(storedUsers) || {};
-                    Object.values(users).forEach(user => {
-                        if (!user.archive) user.archive = {};
-                        Object.values(user.stores || {}).forEach(store => {
-                            store.departments.forEach(dept => {
-                                if (dept.products.some(p => typeof p === 'string')) {
-                                    dept.products = dept.products.map(p => typeof p === 'string' ? { name: p, quantity: 1, comment: '' } : p);
-                                }
-                            });
-                        });
-                        Object.values(user.lists || {}).forEach(list => {
-                            list.items.forEach(item => {
-                                if (item.image) delete item.image;
-                            });
-                        });
-                        Object.values(user.archive || {}).forEach(list => {
-                            list.items.forEach(item => {
-                                if (item.image) delete item.image;
-                            });
+                const response = await fetch('/api/users', {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                users = await response.json() || {};
+                Object.values(users).forEach(user => {
+                    if (!user.archive) user.archive = {};
+                    Object.values(user.stores || {}).forEach(store => {
+                        store.departments.forEach(dept => {
+                            if (dept.products.some(p => typeof p === 'string')) {
+                                dept.products = dept.products.map(p => typeof p === 'string' ? { name: p, quantity: 1, comment: '' } : p);
+                            }
                         });
                     });
-                }
+                    Object.values(user.lists || {}).forEach(list => {
+                        list.items.forEach(item => {
+                            if (item.image) delete item.image;
+                        });
+                    });
+                    Object.values(user.archive || {}).forEach(list => {
+                        list.items.forEach(item => {
+                            if (item.image) delete item.image;
+                        });
+                    });
+                });
             } catch (e) {
-                console.error('Error parsing users from localStorage:', e);
+                console.error('Error fetching users from server:', e);
                 users = {};
+                alert('Не удалось загрузить данные с сервера. Работаем с пустым набором данных.');
             }
         }
 
-        function saveUsers() {
+        async function saveUsers() {
             try {
-                localStorage.setItem('users', JSON.stringify(users));
+                const response = await fetch('/api/users', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(users)
+                });
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                console.log('Users saved to server');
             } catch (e) {
-                console.error('Error saving users to localStorage:', e);
+                console.error('Error saving users to server:', e);
+                alert('Не удалось сохранить данные на сервере. Пожалуйста, попробуйте снова.');
             }
         }
 
@@ -734,7 +744,7 @@
             passwordInput.value = '';
         }
 
-        function login() {
+        async function login() {
             const usernameInput = document.getElementById('username');
             const passwordInput = document.getElementById('password');
             if (!usernameInput || !passwordInput) return;
@@ -747,9 +757,10 @@
                 return;
             }
 
+            await loadUsers(); // Refresh users data
             if (!users[username]) {
                 users[username] = { password, lists: {}, stores: {}, archive: {} };
-                saveUsers();
+                await saveUsers();
             }
 
             if (users[username].password === password) {
@@ -1710,10 +1721,10 @@
         }
 
         // Инициализация
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             console.log('DOM fully loaded, initializing...');
             initTheme();
-            loadUsers();
+            await loadUsers();
             updateAuthState();
 
             const shopTabBtn = document.getElementById('shopTabBtn');
@@ -1820,10 +1831,6 @@
             const addStoreBtn = document.getElementById('addStoreBtn');
             const addDepartmentBtn = document.getElementById('addDepartmentBtn');
             const addProductBtn = document.getElementById('addProductBtn');
-            const loginBtn = document.getElementById('loginBtn');
-            const registerBtn = document.getElementById('registerBtn');
-            const logoutBtn = document.getElementById('logoutBtn');
-            const customProductInput = document.getElementById('customProduct');
             const loadFileInput = document.getElementById('loadFile');
             const toggleSelectedItemsBtn = document.getElementById('toggleSelectedItems');
 
@@ -1842,6 +1849,14 @@
             if (addStoreBtn) addStoreBtn.onclick = addStore;
             if (addDepartmentBtn) addDepartmentBtn.onclick = addDepartment;
             if (addProductBtn) addProductBtn.onclick = addProduct;
+            if (loadFileInput) loadFileInput.onchange = loadListFromFile;
+            if (toggleSelectedItemsBtn) toggleSelectedItemsBtn.onclick = toggleSelectedItemsColumn;
+
+            const loginBtn = document.getElementById('loginBtn');
+            const registerBtn = document.getElementById('registerBtn');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const customProductInput = document.getElementById('customProduct');
+
             if (loginBtn) loginBtn.onclick = login;
             if (registerBtn) registerBtn.onclick = register;
             if (logoutBtn) logoutBtn.onclick = logout;
@@ -1849,8 +1864,6 @@
                 customProductInput.oninput = () => suggestProducts(customProductInput.value);
                 customProductInput.onkeydown = handleKey;
             }
-            if (loadFileInput) loadFileInput.onchange = loadListFromFile;
-            if (toggleSelectedItemsBtn) toggleSelectedItemsBtn.onclick = toggleSelectedItemsColumn;
 
             console.log('Initialization complete');
         });
