@@ -692,6 +692,7 @@
         let selectedStore = null;
         let selectedSuggestionIndex = -1;
         let archiveTimeouts = {};
+        let offlineQueue = [];
 
         function initTheme() {
             const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -701,7 +702,6 @@
         function toggleTheme() {
             const currentTheme = document.documentElement.getAttribute('data-theme');
             document.documentElement.setAttribute('data-theme', currentTheme === 'dark' ? 'light' : 'dark');
-            console.log('Theme toggled to:', document.documentElement.getAttribute('data-theme'));
         }
 
         function toggleMenu() {
@@ -714,13 +714,9 @@
         }
 
         function showTab(tabId, btnId) {
-            console.log(`Attempting to show tab: ${tabId} with button: ${btnId}`);
             const tab = document.getElementById(tabId);
             const btn = document.getElementById(btnId);
-            if (!tab || !btn) {
-                console.warn(`Tab (${tabId}) or Button (${btnId}) not found`);
-                return;
-            }
+            if (!tab || !btn) return;
 
             document.querySelectorAll('.tab.active').forEach(tab => tab.classList.remove('active'));
             document.querySelectorAll('nav button.active').forEach(btn => btn.classList.remove('active'));
@@ -728,7 +724,6 @@
             tab.classList.add('active');
             btn.classList.add('active');
 
-            // Close menu on mobile after tab selection
             const navMenu = document.getElementById('navMenu');
             const menuToggle = document.getElementById('menuToggle');
             if (navMenu && navMenu.classList.contains('open') && window.innerWidth <= 430) {
@@ -746,13 +741,12 @@
             } else if (tabId === 'archiveTab') {
                 updateArchiveList();
             }
-            console.log(`Tab switched to: ${tabId}`);
         }
 
         async function loadUsers() {
             try {
                 const pingResponse = await fetch('/api/ping', { method: 'HEAD', timeout: 5000 });
-                if (!pingResponse.ok) throw new Error(`Server ping failed with status: ${pingResponse.status}`);
+                if (!pingResponse.ok) throw new Error('Server ping failed');
 
                 const response = await fetch('/api/users', {
                     method: 'GET',
@@ -761,9 +755,8 @@
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 users = await response.json() || {};
                 localStorage.setItem('users', JSON.stringify(users));
-                console.log('Users successfully fetched from server');
             } catch (e) {
-                console.warn('Failed to fetch users from server, using localStorage fallback:', e.message);
+                console.warn('Failed to fetch users from server, using localStorage:', e.message);
                 const localUsers = localStorage.getItem('users');
                 users = localUsers ? JSON.parse(localUsers) : {};
             }
@@ -774,16 +767,6 @@
                         if (dept.products.some(p => typeof p === 'string')) {
                             dept.products = dept.products.map(p => typeof p === 'string' ? { name: p, quantity: 1, comment: '' } : p);
                         }
-                    });
-                });
-                Object.values(user.lists || {}).forEach(list => {
-                    list.items.forEach(item => {
-                        if (item.image) delete item.image;
-                    });
-                });
-                Object.values(user.archive || {}).forEach(list => {
-                    list.items.forEach(item => {
-                        if (item.image) delete item.image;
                     });
                 });
             });
@@ -797,12 +780,69 @@
                     body: JSON.stringify(users)
                 });
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                console.log('Users saved to server');
                 localStorage.setItem('users', JSON.stringify(users));
+                offlineQueue = [];
             } catch (e) {
-                console.warn('Error saving users to server, saving to localStorage:', e.message);
+                console.warn('Error saving users to server, queuing:', e.message);
+                offlineQueue.push({ action: 'saveUsers', data: JSON.stringify(users) });
                 localStorage.setItem('users', JSON.stringify(users));
+                localStorage.setItem('offlineQueue', JSON.stringify(offlineQueue));
             }
+        }
+
+        async function syncUserData() {
+            if (!currentUser || !users[currentUser]) return;
+            try {
+                const userData = {
+                    lists: users[currentUser].lists,
+                    stores: users[currentUser].stores,
+                    archive: users[currentUser].archive
+                };
+                const response = await fetch(`/api/users/${currentUser}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(userData)
+                });
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                localStorage.setItem('users', JSON.stringify(users));
+                offlineQueue = [];
+                localStorage.setItem('offlineQueue', JSON.stringify(offlineQueue));
+            } catch (e) {
+                console.warn('Error syncing user data, queuing:', e.message);
+                offlineQueue.push({ action: 'syncUserData', user: currentUser, data: JSON.stringify(users[currentUser]) });
+                localStorage.setItem('users', JSON.stringify(users));
+                localStorage.setItem('offlineQueue', JSON.stringify(offlineQueue));
+            }
+        }
+
+        async function processOfflineQueue() {
+            const queue = JSON.parse(localStorage.getItem('offlineQueue') || '[]');
+            if (queue.length === 0) return;
+
+            for (const item of queue) {
+                try {
+                    if (item.action === 'saveUsers') {
+                        const response = await fetch('/api/users', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: item.data
+                        });
+                        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    } else if (item.action === 'syncUserData') {
+                        const response = await fetch(`/api/users/${item.user}`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: item.data
+                        });
+                        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                } catch (e) {
+                    console.warn('Failed to process offline queue item:', e.message);
+                    return;
+                }
+            }
+            offlineQueue = [];
+            localStorage.setItem('offlineQueue', JSON.stringify(offlineQueue));
         }
 
         function register() {
@@ -851,9 +891,25 @@
 
             if (users[username].password === password) {
                 currentUser = username;
-                localStorage.setItem('currentUser', currentUser); // Persist currentUser
-                shoppingLists = users[username].lists || {};
-                defaultStores = users[username].stores || {};
+                localStorage.setItem('currentUser', currentUser);
+                try {
+                    const response = await fetch(`/api/users/${username}`, {
+                        method: 'GET',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    const userData = await response.json();
+                    users[username] = { ...users[username], ...userData };
+                    shoppingLists = users[username].lists || {};
+                    defaultStores = users[username].stores || {};
+                    users[username].archive = users[username].archive || {};
+                } catch (e) {
+                    console.warn('Failed to fetch user data from server, using local data:', e.message);
+                    shoppingLists = users[username].lists || {};
+                    defaultStores = users[username].stores || {};
+                    users[username].archive = users[username].archive || {};
+                }
+                await processOfflineQueue();
                 updateAuthState();
                 updateListSelect();
                 updateStoreSelect();
@@ -861,6 +917,8 @@
                 updateProductList();
                 updateListManagement();
                 updateArchiveList();
+                updateShoppingList();
+                updateSelectedItemsColumn();
                 alert('Вход выполнен!');
             } else {
                 alert('Неверный пароль!');
@@ -869,7 +927,7 @@
 
         function logout() {
             currentUser = null;
-            localStorage.removeItem('currentUser'); // Clear currentUser
+            localStorage.removeItem('currentUser');
             shoppingLists = {};
             defaultStores = {};
             selectedList = null;
@@ -903,8 +961,7 @@
                 users[currentUser].lists = shoppingLists;
                 users[currentUser].stores = defaultStores;
                 users[currentUser].archive = users[currentUser].archive || {};
-                saveUsers();
-                localStorage.setItem('users', JSON.stringify(users));
+                syncUserData();
             }
         }
 
@@ -1504,8 +1561,6 @@
             const deptName = deptSelect.value;
             const productName = productSelect.value;
 
-            console.log('Adding item from select:', { storeName, deptName, productName, selectedList });
-
             if (!storeName) {
                 alert('Выберите магазин!');
                 return;
@@ -1518,7 +1573,6 @@
                 const dept = defaultStores[storeName].departments.find(d => d.name === deptName);
                 const product = dept.products.find(p => p.name === productName);
 
-                // Check for existing item
                 const existingItem = shoppingLists[selectedList].items.find(
                     item => item.name === productName && item.dept?.name === deptName
                 );
@@ -1555,8 +1609,6 @@
             const storeName = storeSelect.value;
             const customProduct = customProductInput.value;
 
-            console.log('Adding item from input:', { storeName, customProduct, selectedList });
-
             if (!storeName) {
                 alert('Выберите магазин!');
                 return;
@@ -1568,7 +1620,6 @@
                 shoppingLists[selectedList].store = storeName;
                 const existingDept = findDepartment(customProduct);
 
-                // Check for existing item
                 const existingItem = shoppingLists[selectedList].items.find(
                     item => item.name === customProduct && (!item.dept || item.dept.name === (existingDept?.name || null))
                 );
@@ -1816,13 +1867,29 @@
 
         document.addEventListener('DOMContentLoaded', async () => {
             await loadUsers();
+            await processOfflineQueue();
 
-            // Restore currentUser from localStorage
             const storedUser = localStorage.getItem('currentUser');
             if (storedUser && users[storedUser]) {
                 currentUser = storedUser;
-                shoppingLists = users[currentUser].lists || {};
-                defaultStores = users[currentUser].stores || {};
+                try {
+                    const response = await fetch(`/api/users/${currentUser}`, {
+                        method: 'GET',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    const userData = await response.json();
+                    users[currentUser] = { ...users[currentUser], ...userData };
+                    shoppingLists = users[currentUser].lists || {};
+                    defaultStores = users[currentUser].stores || {};
+                    users[currentUser].archive = users[currentUser].archive || {};
+                } catch (e) {
+                    console.warn('Failed to fetch user data from server, using local data:', e.message);
+                    shoppingLists = users[currentUser].lists || {};
+                    defaultStores = users[currentUser].stores || {};
+                    users[currentUser].archive = users[currentUser].archive || {};
+                }
+                await processOfflineQueue();
                 updateAuthState();
                 updateListSelect();
                 updateStoreSelect();
@@ -1858,24 +1925,22 @@
             document.getElementById('downloadListBtn').addEventListener('click', downloadList);
             document.getElementById('loadListBtn').addEventListener('click', () => document.getElementById('loadFile').click());
             document.getElementById('loadFile').addEventListener('change', loadList);
-            document.getElementById('toggleSelectedItems').addEventListener('click', () => {
-                const column = document.getElementById('selectedItemsColumn');
-                column.classList.toggle('active');
-            });
-
-            document.getElementById('storeSelect').addEventListener('change', updateDeptSelect);
-            document.getElementById('deptSelect').addEventListener('change', updateProductSelect);
-            document.getElementById('storeSelectForDept').addEventListener('change', updateDeptList);
-            document.getElementById('storeSelectForProducts').addEventListener('change', updateDeptSelectForProducts);
-            document.getElementById('deptSelectForProducts').addEventListener('change', updateProductList);
             document.getElementById('customProduct').addEventListener('input', (e) => suggestProducts(e.target.value));
             document.getElementById('customProduct').addEventListener('keydown', handleKey);
+            document.getElementById('storeSelect').addEventListener('change', updateDeptSelect);
+            document.getElementById('storeSelectForDept').addEventListener('change', updateDeptList);
+            document.getElementById('storeSelectForProducts').addEventListener('change', updateDeptSelectForProducts);
+            document.getElementById('deptSelect').addEventListener('change', updateProductSelect);
             document.getElementById('listSelect').addEventListener('change', (e) => {
                 selectedList = e.target.value;
                 updateShoppingList();
                 updateSelectedItemsColumn();
             });
             document.getElementById('listSelectForShop').addEventListener('change', updateShoppingList);
+            document.getElementById('toggleSelectedItems').addEventListener('click', () => {
+                const column = document.getElementById('selectedItemsColumn');
+                column.classList.toggle('active');
+            });
         });
     </script>
 </body>
