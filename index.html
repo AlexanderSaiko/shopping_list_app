@@ -69,6 +69,12 @@
             gap: 8px;
         }
 
+        #navMenu {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
         nav button {
             background: none;
             border: none;
@@ -91,6 +97,23 @@
             cursor: pointer;
             color: var(--secondary-text);
             min-height: 44px;
+        }
+
+        .menu-toggle {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--secondary-text);
+            min-height: 44px;
+            min-width: 44px;
+            display: none;
+        }
+
+        .auth-info {
+            color: var(--secondary-text);
+            font-size: 14px;
+            margin-left: 8px;
         }
 
         .container {
@@ -249,12 +272,6 @@
             background: var(--background);
         }
 
-        .auth-info {
-            color: var(--secondary-text);
-            font-size: 14px;
-            margin-left: 8px;
-        }
-
         .list-controls {
             display: flex;
             align-items: center;
@@ -334,9 +351,10 @@
             }
 
             header {
-                flex-direction: column;
-                padding: 8px;
-                gap: 8px;
+                flex-direction: row;
+                align-items: center;
+                padding: 8px 12px;
+                height: 50px;
             }
 
             header h1 {
@@ -344,15 +362,49 @@
             }
 
             nav {
-                justify-content: center;
-                width: 100%;
-                flex-wrap: wrap;
+                position: relative;
+                width: auto;
             }
 
-            nav button {
-                font-size: 14px;
-                padding: 6px 8px;
+            #navMenu {
+                display: none;
+                flex-direction: column;
+                position: absolute;
+                top: 50px;
+                left: -12px;
+                right: -12px;
+                background: var(--card-background);
+                border: 1px solid var(--border);
+                border-radius: 0 0 10px 10px;
+                box-shadow: var(--shadow);
+                padding: 8px;
+                z-index: 99;
+                animation: slideDown 0.3s ease;
+            }
+
+            #navMenu.open {
+                display: flex;
+            }
+
+            @keyframes slideDown {
+                from { opacity: 0; transform: translateY(-10px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+
+            nav button, .theme-toggle, .auth-info {
+                width: 100%;
+                text-align: left;
+                padding: 12px 16px;
+                font-size: 16px;
                 min-height: 44px;
+            }
+
+            .auth-info {
+                margin: 8px 0;
+            }
+
+            .menu-toggle {
+                display: block;
             }
 
             .container {
@@ -399,10 +451,6 @@
                 width: 100%;
             }
 
-            .auth-info {
-                margin-top: 8px;
-            }
-
             .list-controls {
                 flex-direction: column;
                 align-items: flex-start;
@@ -442,14 +490,17 @@
     <header>
         <h1>Список покупок</h1>
         <nav>
-            <button id="shopTabBtn" class="active">В магазине</button>
-            <button id="listsTabBtn">Списки</button>
-            <button id="productsTabBtn">Продукты</button>
-            <button id="storesTabBtn">Магазины</button>
-            <button id="archiveTabBtn">Архив</button>
-            <button id="authTabBtn">Авторизация</button>
-            <button id="themeToggle" class="theme-toggle">🌙</button>
-            <span class="auth-info" id="authInfo"></span>
+            <button id="menuToggle" class="menu-toggle">☰</button>
+            <div id="navMenu">
+                <button id="shopTabBtn" class="active">В магазине</button>
+                <button id="listsTabBtn">Списки</button>
+                <button id="productsTabBtn">Продукты</button>
+                <button id="storesTabBtn">Магазины</button>
+                <button id="archiveTabBtn">Архив</button>
+                <button id="authTabBtn">Авторизация</button>
+                <button id="themeToggle" class="theme-toggle">🌙</button>
+                <span class="auth-info" id="authInfo"></span>
+            </div>
         </nav>
     </header>
 
@@ -573,6 +624,15 @@
             console.log('Theme toggled to:', document.documentElement.getAttribute('data-theme'));
         }
 
+        function toggleMenu() {
+            const navMenu = document.getElementById('navMenu');
+            const menuToggle = document.getElementById('menuToggle');
+            if (navMenu && menuToggle) {
+                navMenu.classList.toggle('open');
+                menuToggle.textContent = navMenu.classList.contains('open') ? '✕' : '☰';
+            }
+        }
+
         function showTab(tabId, btnId) {
             console.log(`Attempting to show tab: ${tabId} with button: ${btnId}`);
             const tab = document.getElementById(tabId);
@@ -587,6 +647,14 @@
 
             tab.classList.add('active');
             btn.classList.add('active');
+
+            // Close menu on mobile after tab selection
+            const navMenu = document.getElementById('navMenu');
+            const menuToggle = document.getElementById('menuToggle');
+            if (navMenu && navMenu.classList.contains('open') && window.innerWidth <= 430) {
+                navMenu.classList.remove('open');
+                if (menuToggle) menuToggle.textContent = '☰';
+            }
 
             if (tabId === 'storesTab') {
                 updateStoreList();
@@ -1055,7 +1123,7 @@
                 saveShoppingLists();
                 updateDeptList();
             } else if (defaultStores[storeName].departments.find(d => d.name === newDeptName)) {
-                    alert('Отдел с таким названием уже существует!');
+                alert('Отдел с таким названием уже существует!');
             }
         }
 
@@ -1655,6 +1723,7 @@
             const archiveTabBtn = document.getElementById('archiveTabBtn');
             const authTabBtn = document.getElementById('authTabBtn');
             const themeToggle = document.getElementById('themeToggle');
+            const menuToggle = document.getElementById('menuToggle');
 
             if (shopTabBtn) {
                 shopTabBtn.onclick = () => {
@@ -1724,6 +1793,16 @@
                 console.log('Theme toggle button listener attached');
             } else {
                 console.warn('Theme toggle button not found');
+            }
+
+            if (menuToggle) {
+                menuToggle.onclick = () => {
+                    console.log('Menu toggle button clicked');
+                    toggleMenu();
+                };
+                console.log('Menu toggle button listener attached');
+            } else {
+                console.warn('Menu toggle button not found');
             }
 
             const listSelectForShop = document.getElementById('listSelectForShop');
