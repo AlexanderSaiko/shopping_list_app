@@ -851,6 +851,7 @@
 
             if (users[username].password === password) {
                 currentUser = username;
+                localStorage.setItem('currentUser', currentUser); // Persist currentUser
                 shoppingLists = users[username].lists || {};
                 defaultStores = users[username].stores || {};
                 updateAuthState();
@@ -868,6 +869,7 @@
 
         function logout() {
             currentUser = null;
+            localStorage.removeItem('currentUser'); // Clear currentUser
             shoppingLists = {};
             defaultStores = {};
             selectedList = null;
@@ -1814,6 +1816,24 @@
 
         document.addEventListener('DOMContentLoaded', async () => {
             await loadUsers();
+
+            // Restore currentUser from localStorage
+            const storedUser = localStorage.getItem('currentUser');
+            if (storedUser && users[storedUser]) {
+                currentUser = storedUser;
+                shoppingLists = users[currentUser].lists || {};
+                defaultStores = users[currentUser].stores || {};
+                updateAuthState();
+                updateListSelect();
+                updateStoreSelect();
+                updateStoreList();
+                updateProductList();
+                updateListManagement();
+                updateArchiveList();
+                updateShoppingList();
+                updateSelectedItemsColumn();
+            }
+
             initTheme();
             updateAuthState();
 
