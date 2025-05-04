@@ -87,7 +87,7 @@
             position: relative;
         }
 
-        nav button::before, .theme-toggle::before {
+        nav button::before {
             content: attr(data-icon);
             font-size: 18px;
             margin-right: 8px;
@@ -105,7 +105,17 @@
             cursor: pointer;
             color: var(--secondary-text);
             min-height: 44px;
-            position: relative;
+            min-width: 44px;
+            padding: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .theme-toggle::before {
+            content: '🌙';
+            font-size: 20px;
+            margin: 0;
         }
 
         .menu-toggle {
@@ -354,9 +364,44 @@
             margin: 8px 0;
         }
 
+        .mobile-item-controls {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-left: auto;
+        }
+
+        .mobile-item-controls button {
+            background: none;
+            border: none;
+            color: var(--accent);
+            font-size: 16px;
+            padding: 4px;
+            min-height: 32px;
+            min-width: 32px;
+        }
+
+        .quantity-display {
+            cursor: pointer;
+            padding: 4px 8px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+            min-width: 40px;
+            text-align: center;
+        }
+
+        .mobile-input {
+            display: none;
+            width: 100px;
+            padding: 4px;
+            font-size: 14px;
+            min-height: 32px;
+        }
+
         @media (max-width: 430px) {
             body {
-                font-size: 16px;
+                font-size: 14px;
             }
 
             header {
@@ -416,12 +461,12 @@
                 text-align: center;
             }
 
-            nav button::before, .theme-toggle::before {
+            nav button::before {
                 margin-right: 0;
                 font-size: 20px;
             }
 
-            nav button .text, .theme-toggle .text {
+            nav button .text {
                 display: none;
             }
 
@@ -445,7 +490,7 @@
             select, input[type="text"], input[type="number"], input[type="password"] {
                 max-width: 100%;
                 min-height: 44px;
-                font-size: 16px;
+                font-size: 14px;
             }
 
             button {
@@ -455,26 +500,22 @@
             }
 
             ul li {
-                flex-direction: column;
-                align-items: flex-start;
+                flex-direction: row;
+                align-items: center;
+                padding: 8px;
+                margin: 4px 0;
+                font-size: 14px;
+                border: 1px solid var(--border);
+                box-shadow: none;
+                min-height: 44px;
             }
 
             .quantity-controls {
-                width: 100%;
-                justify-content: space-between;
-            }
-
-            .quantity-controls button {
-                min-height: 44px;
+                display: none;
             }
 
             .comment-input, .price-input {
-                max-width: 100%;
-                min-height: 44px;
-            }
-
-            #suggestions {
-                width: 100%;
+                display: none;
             }
 
             .list-controls {
@@ -488,6 +529,7 @@
 
             .total-sum {
                 text-align: left;
+                font-size: 16px;
             }
 
             .lists-tab-content {
@@ -536,9 +578,7 @@
                 <button id="authTabBtn" data-icon="🔑" aria-label="Открыть вкладку Авторизация">
                     <span class="text">Авторизация</span>
                 </button>
-                <button id="themeToggle" class="theme-toggle" data-icon="🌙" aria-label="Переключить тему">
-                    <span class="text">🌙</span>
-                </button>
+                <button id="themeToggle" class="theme-toggle" aria-label="Переключить тему"></button>
                 <span class="auth-info" id="authInfo"></span>
             </div>
         </nav>
@@ -711,7 +751,6 @@
 
         async function loadUsers() {
             try {
-                // Check if server is reachable with a lightweight HEAD request
                 const pingResponse = await fetch('/api/ping', { method: 'HEAD', timeout: 5000 });
                 if (!pingResponse.ok) throw new Error(`Server ping failed with status: ${pingResponse.status}`);
 
@@ -721,16 +760,13 @@
                 });
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 users = await response.json() || {};
-                // Save to localStorage after successful fetch
                 localStorage.setItem('users', JSON.stringify(users));
                 console.log('Users successfully fetched from server');
             } catch (e) {
                 console.warn('Failed to fetch users from server, using localStorage fallback:', e.message);
-                // Load from localStorage as fallback
                 const localUsers = localStorage.getItem('users');
                 users = localUsers ? JSON.parse(localUsers) : {};
             }
-            // Normalize users data
             Object.values(users).forEach(user => {
                 if (!user.archive) user.archive = {};
                 Object.values(user.stores || {}).forEach(store => {
@@ -762,11 +798,9 @@
                 });
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 console.log('Users saved to server');
-                // Save to localStorage after successful server save
                 localStorage.setItem('users', JSON.stringify(users));
             } catch (e) {
                 console.warn('Error saving users to server, saving to localStorage:', e.message);
-                // Save to localStorage even if server fails
                 localStorage.setItem('users', JSON.stringify(users));
             }
         }
@@ -809,7 +843,7 @@
                 return;
             }
 
-            await loadUsers(); // Refresh users data
+            await loadUsers();
             if (!users[username]) {
                 users[username] = { password, lists: {}, stores: {}, archive: {} };
                 await saveUsers();
@@ -868,7 +902,6 @@
                 users[currentUser].stores = defaultStores;
                 users[currentUser].archive = users[currentUser].archive || {};
                 saveUsers();
-                // Update localStorage
                 localStorage.setItem('users', JSON.stringify(users));
             }
         }
@@ -1482,15 +1515,27 @@
                 shoppingLists[selectedList].store = storeName;
                 const dept = defaultStores[storeName].departments.find(d => d.name === deptName);
                 const product = dept.products.find(p => p.name === productName);
-                shoppingLists[selectedList].items.push({
-                    name: productName,
-                    dept: dept ? { name: dept.name, order: dept.order } : null,
-                    isCustom: false,
-                    quantity: product.quantity,
-                    comment: product.comment || '',
-                    price: 0,
-                    completed: false
-                });
+
+                // Check for existing item
+                const existingItem = shoppingLists[selectedList].items.find(
+                    item => item.name === productName && item.dept?.name === deptName
+                );
+                if (existingItem) {
+                    existingItem.quantity += product.quantity;
+                    existingItem.comment = product.comment || existingItem.comment;
+                    existingItem.price = existingItem.price || 0;
+                } else {
+                    shoppingLists[selectedList].items.push({
+                        name: productName,
+                        dept: dept ? { name: dept.name, order: dept.order } : null,
+                        isCustom: false,
+                        quantity: product.quantity,
+                        comment: product.comment || '',
+                        price: 0,
+                        completed: false
+                    });
+                }
+
                 saveShoppingLists();
                 productSelect.value = '';
                 updateShoppingList();
@@ -1520,15 +1565,27 @@
                 ensureSelectedList();
                 shoppingLists[selectedList].store = storeName;
                 const existingDept = findDepartment(customProduct);
-                shoppingLists[selectedList].items.push({
-                    name: customProduct,
-                    dept: existingDept ? { name: existingDept.name, order: existingDept.order } : null,
-                    isCustom: !existingDept,
-                    quantity: 1,
-                    comment: '',
-                    price: 0,
-                    completed: false
-                });
+
+                // Check for existing item
+                const existingItem = shoppingLists[selectedList].items.find(
+                    item => item.name === customProduct && (!item.dept || item.dept.name === (existingDept?.name || null))
+                );
+                if (existingItem) {
+                    existingItem.quantity += 1;
+                    existingItem.comment = existingItem.comment || '';
+                    existingItem.price = existingItem.price || 0;
+                } else {
+                    shoppingLists[selectedList].items.push({
+                        name: customProduct,
+                        dept: existingDept ? { name: existingDept.name, order: existingDept.order } : null,
+                        isCustom: !existingDept,
+                        quantity: 1,
+                        comment: '',
+                        price: 0,
+                        completed: false
+                    });
+                }
+
                 saveShoppingLists();
                 customProductInput.value = '';
                 document.getElementById('suggestions').innerHTML = '';
@@ -1568,7 +1625,7 @@
             if (allCompleted && shoppingLists[listName].items.length > 0) {
                 archiveTimeouts[listName] = setTimeout(() => {
                     archiveList(listName);
-                }, 10 * 60 * 1000); // 10 minutes
+                }, 10 * 60 * 1000);
             }
         }
 
@@ -1584,20 +1641,35 @@
             const selectedListForShop = listSelectForShop.value || selectedList;
             if (selectedListForShop && shoppingLists[selectedListForShop]) {
                 selectedStore = shoppingLists[selectedListForShop].store;
+                const isMobile = window.innerWidth <= 430;
                 shoppingLists[selectedListForShop].items.forEach((item, index) => {
                     const li = document.createElement('li');
-                    li.innerHTML = `
-                        <span>${item.dept ? `${item.name} (${item.dept.name})` : item.name}</span>
-                        <div class="quantity-controls">
-                            <button onclick="changeQuantity('${selectedListForShop}', ${index}, -1)">−</button>
-                            <input type="number" min="1" value="${item.quantity}" onchange="updateQuantity('${selectedListForShop}', ${index}, this.value)">
-                            <button onclick="changeQuantity('${selectedListForShop}', ${index}, 1)">+</button>
-                        </div>
-                        <input type="text" class="comment-input" placeholder="Комментарий" value="${item.comment || ''}" oninput="updateComment('${selectedListForShop}', ${index}, this.value)">
-                        <input type="number" class="price-input" placeholder="Цена" step="0.01" min="0" value="${item.price > 0 ? item.price : ''}" oninput="updatePrice('${selectedListForShop}', ${index}, this.value)">
-                    `;
+                    if (isMobile) {
+                        li.innerHTML = `
+                            <span style="flex-grow: 1;">${item.dept ? `${item.name} (${item.dept.name})` : item.name}</span>
+                            <span class="quantity-display" onclick="toggleQuantityInput(${index}, this)">${item.quantity}</span>
+                            <input type="number" class="mobile-input quantity-input" min="1" value="${item.quantity}" style="display: none;" onchange="updateQuantity('${selectedListForShop}', ${index}, this.value)">
+                            <div class="mobile-item-controls">
+                                <button onclick="toggleCommentInput(${index}, this)">✍️</button>
+                                <input type="text" class="mobile-input comment-input" placeholder="Комментарий" value="${item.comment || ''}" style="display: none;" oninput="updateComment('${selectedListForShop}', ${index}, this.value)">
+                                <button onclick="togglePriceInput(${index}, this)">💵</button>
+                                <input type="number" class="mobile-input price-input" placeholder="Цена" step="0.01" min="0" value="${item.price > 0 ? item.price : ''}" style="display: none;" oninput="updatePrice('${selectedListForShop}', ${index}, this.value)">
+                            </div>
+                        `;
+                    } else {
+                        li.innerHTML = `
+                            <span>${item.dept ? `${item.name} (${item.dept.name})` : item.name}</span>
+                            <div class="quantity-controls">
+                                <button onclick="changeQuantity('${selectedListForShop}', ${index}, -1)">−</button>
+                                <input type="number" min="1" value="${item.quantity}" onchange="updateQuantity('${selectedListForShop}', ${index}, this.value)">
+                                <button onclick="changeQuantity('${selectedListForShop}', ${index}, 1)">+</button>
+                            </div>
+                            <input type="text" class="comment-input" placeholder="Комментарий" value="${item.comment || ''}" oninput="updateComment('${selectedListForShop}', ${index}, this.value)">
+                            <input type="number" class="price-input" placeholder="Цена" step="0.01" min="0" value="${item.price > 0 ? item.price : ''}" oninput="updatePrice('${selectedListForShop}', ${index}, this.value)">
+                        `;
+                    }
                     li.onclick = (e) => {
-                        if (e.target.tagName !== 'BUTTON' && e.target.tagName !== 'INPUT') {
+                        if (e.target.tagName !== 'BUTTON' && e.target.tagName !== 'INPUT' && e.target.className !== 'quantity-display') {
                             item.completed = !item.completed;
                             li.classList.toggle('completed', item.completed);
                             saveShoppingLists();
@@ -1614,6 +1686,27 @@
             } else {
                 totalSum.textContent = `Итого: 0.00`;
             }
+        }
+
+        function toggleQuantityInput(index, element) {
+            const input = element.nextElementSibling;
+            if (input.style.display === 'none') {
+                input.style.display = 'block';
+                element.style.display = 'none';
+                input.focus();
+            }
+        }
+
+        function toggleCommentInput(index, element) {
+            const input = element.nextElementSibling;
+            input.style.display = input.style.display === 'none' ? 'block' : 'none';
+            if (input.style.display === 'block') input.focus();
+        }
+
+        function togglePriceInput(index, element) {
+            const input = element.nextElementSibling;
+            input.style.display = input.style.display === 'none' ? 'block' : 'none';
+            if (input.style.display === 'block') input.focus();
         }
 
         function updateSelectedItemsColumn() {
@@ -1719,7 +1812,6 @@
             event.target.value = '';
         }
 
-        // Event Listeners
         document.addEventListener('DOMContentLoaded', async () => {
             await loadUsers();
             initTheme();
